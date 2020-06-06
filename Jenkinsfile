@@ -1,12 +1,11 @@
 pipeline {
 agent {
   kubernetes {
-    label "maven-agent"
+    label "python-agent"
     cloud "openshift"
     containerTemplate {
-      name "jnlp"
+      name "basic"
       image "registry.redhat.io/ubi8"  
-      command "sleep 1h"
       resourceRequestMemory "500Mi"
       resourceLimitMemory "500Mi"
       resourceRequestCpu "300m"
