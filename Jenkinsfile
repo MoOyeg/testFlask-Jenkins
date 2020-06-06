@@ -6,8 +6,7 @@ agent {
     containerTemplate {
       name "jnlp"
       image "registry.redhat.io/ubi8"  
-      command '[ "/bin/bash", "-c", "--" ]'
-      args '[ "while true; do sleep 30; done;" ]'
+      command "sleep 1h"
       resourceRequestMemory "500Mi"
       resourceLimitMemory "500Mi"
       resourceRequestCpu "300m"
