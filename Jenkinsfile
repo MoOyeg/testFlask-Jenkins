@@ -4,8 +4,9 @@ agent {
     label "python-agent"
     cloud "openshift"
     containerTemplate {
-      name "basic"
+      name "jnlp"
       image "registry.redhat.io/ubi8"  
+      command "sleep 500000"
       resourceRequestMemory "500Mi"
       resourceLimitMemory "500Mi"
       resourceRequestCpu "300m"
