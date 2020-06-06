@@ -5,9 +5,7 @@ agent {
     cloud "openshift"
     containerTemplate {
       name "jnlp"
-      image "registry.redhat.io/ubi8"
-      command
-        - cat      
+      image "registry.redhat.io/ubi8"  
       resourceRequestMemory "500Mi"
       resourceLimitMemory "500Mi"
       resourceRequestCpu "300m"
