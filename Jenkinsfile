@@ -11,6 +11,7 @@ agent {
       resourceLimitMemory "500Mi"
       resourceRequestCpu "300m"
       resourceLimitCpu "300m"
+      alwaysPullImage "True"
     }
   }
 }
