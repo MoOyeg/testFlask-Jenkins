@@ -5,7 +5,7 @@ agent {
     cloud "openshift"
     containerTemplate {
       name "jnlp"
-      image "openshift/origin-jenkins:4.3.0"  
+      image "image-registry.openshift-image-registry.svc:5000/$JENKINS_NAMESPACE/python-jenkins:latest"  
       resourceRequestMemory "500Mi"
       resourceLimitMemory "500Mi"
       resourceRequestCpu "300m"
