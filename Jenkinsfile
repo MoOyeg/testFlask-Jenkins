@@ -38,19 +38,11 @@ environment {
 
     stage('Checkout Source') {
      steps {
+       echo "Checking out Code}"
        checkout scm
 
          script {
-           def pom = readMavenPom file: 'pom.xml'
-           def version = pom.version
-
-           // Set the tag for the development image: version + build number
-           devTag  = "${version}-" + currentBuild.number
-           // Set the tag for the production image: version
-           prodTag = "${version}"
-
-           // Patch Source artifactId to include GUID
-           sh "sed -i 's/GUID/${GUID}/g' ./pom.xml"
+           sh "ls ./"
          }
       }     
     }
