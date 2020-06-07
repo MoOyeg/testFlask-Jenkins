@@ -5,9 +5,7 @@ agent {
     cloud "openshift"
     containerTemplate {
       name "jnlp"
-      image "registry.redhat.io/ubi8"  
-      command "sleep"
-      args "infinity"
+      image "openshift/origin-jenkins:4.3.0"  
       resourceRequestMemory "500Mi"
       resourceLimitMemory "500Mi"
       resourceRequestCpu "300m"
