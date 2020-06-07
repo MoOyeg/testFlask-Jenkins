@@ -36,6 +36,14 @@ agent {
     }
 
 
+    stage('Install Code Testing Requirements') {
+     steps {
+       script {             
+             sh "pip install -r ./testFlask/requirements.txt"
+          }
+      }     
+    }
+
     stage('Run the Code Unit Testing') {
      steps {
        echo "Starting Unit Testing}"
