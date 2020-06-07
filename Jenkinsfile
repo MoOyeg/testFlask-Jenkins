@@ -25,12 +25,22 @@ agent {
     }
 
 
-    stage('Checkout Application Source') {
+    stage('Clone Application Source') {
      steps {
-       echo "Checking out Application Source Code}"
+       echo "Clone our Application Source Code}"
        script {             
-             sh "git checkout ${REPO}"
+             sh "git clone ${REPO}"
              sh "ls ./"
+          }
+      }     
+    }
+
+
+    stage('Run the Code Unit Testing') {
+     steps {
+       echo "Starting Unit Testing}"
+       script {             
+             sh "python ./test.py"
           }
       }     
     }
