@@ -15,35 +15,23 @@ agent {
   }
 }
 
-environment {
-  // Define global variables
-  mvnCmd = "mvn"
-  
-  // Images and Projects
-  imageName   = "tasks"
-  devProject  = "${GUID}-tasks-dev"
-  prodProject = "${GUID}-tasks-prod"
-
-  // Tags
-  devTag      = "0.0-0"
-  prodTag     = "0.0"
-
-  // Blue-Green Settings
-  destApp     = "tasks-green"
-  activeApp   = ""
-}
-
-
   stages {
 
-    stage('Checkout Source') {
+    stage('Checkout Pipeline Source') {
      steps {
        echo "Checking out Code}"
        checkout scm
+      }     
+    }
 
-         script {
-           sh "ls ./"
-         }
+
+    stage('Checkout Application Source') {
+     steps {
+       echo "Checking out Application Source Code}"
+       script {             
+             sh "git checkout ${REPO}"
+             sh "ls ./"
+          }
       }     
     }
 
