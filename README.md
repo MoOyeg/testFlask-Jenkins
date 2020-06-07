@@ -28,4 +28,11 @@ Environment variables used in Commands have samples in the sample_env file.<br/>
  - Add Permissions for Jenkins service account to Projects<br/>
  ```oc adm policy add-cluster-role-to-user edit system:serviceaccount:$JENKINS_NAMESPACE:jenkins -n $NAMESPACE```<br/>
  ```oc adm policy add-cluster-role-to-user edit system:serviceaccount:$JENKINS_NAMESPACE:jenkins -n $NAMESPACE1```<br/>
+ ```oc adm policy add-cluster-role-to-user edit system:serviceaccount:$JENKINS_NAMESPACE:jenkins -n $JENKINS_NAMESPACE```<br/>
  
+4 **Create Jenkins Slave for Python**<br/>
+- Pass DockerFile Value into Variable<br/>
+```export PYTHON_DOCKERFILE=$(curl https://raw.githubusercontent.com/MoOyeg/testFlask-Jenkins/master/Dockerfile)```<br/>
+
+- Build Slave Image in Jenkins Project<br/>
+```oc new-build --strategy=docker -D="$PYTHON_DOCKERFILE" --name=python-jenkins -n $JENKINS_NAMESPACE```
