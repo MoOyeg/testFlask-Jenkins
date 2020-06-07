@@ -40,7 +40,7 @@ agent {
      steps {
        echo "Starting Unit Testing}"
        script {             
-             sh "python ./test.py"
+             sh "python ./testFlask/test.py"
           }
       }     
     }
