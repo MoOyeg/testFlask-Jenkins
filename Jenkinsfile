@@ -34,20 +34,36 @@ agent {
       }     
     }
 
-    stage('Run the Code Unit Testing') {
+    stage('Run Unit Testing') {
      steps {
        echo "Starting Unit Testing}"
        script {
          try {
            sh "python ./testFlask/test.py"
          } catch (Exception e) {
-           error("Build failed ")
+           error("Build failed at Unittest")
          }
        echo "Unittest Passed"
        }
       }     
     }
 
+    stage('Create Test Version of Application') {
+     steps {
+       script {
+         openshift.withCluster() {
+           openshift.withProject( "${DEV_PROJECT}" ){
+             def app = openshift.newApp('mysql')  
+             def dc = app.narrow('dc')
+             def dcmap = dc.object()           
+             openshift.apply(dcmap)
+           }
+         }
+       }
+
+      }     
+    }
+    
     
    
   }
