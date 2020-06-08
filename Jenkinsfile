@@ -41,6 +41,11 @@ agent {
        script {             
              sh "python ./testFlask/test.py"
           }
+       if (fileExists('error.txt')) {
+         echo 'Yes'
+       } else {
+         echo 'No' 
+       }
       }     
     }
 
