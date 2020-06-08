@@ -30,7 +30,7 @@ agent {
        echo "Clone our Application Source Code}"
        script {             
              sh "git clone ${REPO}"
-             sh "ls ./"
+             sh "ls ./testFlask"
           }
       }     
     }
@@ -40,7 +40,8 @@ agent {
        echo "Starting Unit Testing}"
        script {             
              sh "python ./testFlask/test.py"
-             if (fileExists('error.txt')) {
+             sh "ls ./testFlask"
+             if (fileExists('./testFlask/error.txt')) {
                echo 'Yes'
              } else {
                echo 'No'
