@@ -44,6 +44,11 @@ agent {
       }     
     }
 
+    if (fileExists('error.txt')) {
+      echo 'Yes'
+    } else {
+      echo 'No' 
+    }
    
   }
 }
