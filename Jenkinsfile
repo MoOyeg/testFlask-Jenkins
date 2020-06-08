@@ -30,7 +30,6 @@ agent {
        echo "Clone our Application Source Code}"
        script {             
              sh "git clone ${REPO}"
-             sh "ls ./testFlask"
           }
       }     
     }
@@ -38,15 +37,14 @@ agent {
     stage('Run the Code Unit Testing') {
      steps {
        echo "Starting Unit Testing}"
-       script {             
-             sh "python ./testFlask/test.py"
-             sh "ls ./testFlask"
-             if (fileExists('./testFlask/error.txt')) {
-               echo 'Yes'
-             } else {
-               echo 'No'
-             }
-           }
+       script {
+         try {
+           sh "python ./testFlask/test.py"
+         } catch (Exception e) {
+           error("Build failed ")
+         }
+       echo "Unittest Passed"
+       }
       }     
     }
 
