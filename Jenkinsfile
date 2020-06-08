@@ -40,15 +40,16 @@ agent {
        echo "Starting Unit Testing}"
        script {             
              sh "python ./testFlask/test.py"
-          }
+             if (fileExists('error.txt')) {
+               echo 'Yes'
+             } else {
+               echo 'No'
+             }
+           }
       }     
     }
 
-    if (fileExists('error.txt')) {
-      echo 'Yes'
-    } else {
-      echo 'No' 
-    }
+    
    
   }
 }
