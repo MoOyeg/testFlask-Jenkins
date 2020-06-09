@@ -2,13 +2,11 @@
     "apiVersion": "apps.openshift.io/v1",
     "kind": "DeploymentConfig",
     "metadata": {
+        "annotations": {
+            "openshift.io/generated-by": "OpenShiftNewApp"
+        },
         "creationTimestamp": null,
         "generation": 1,
-        "labels": {
-            "app": "mysql",
-            "app.kubernetes.io/component": "mysql",
-            "app.kubernetes.io/instance": "mysql"
-        },
         "name": "mysql"
     },
     "spec": {
@@ -43,6 +41,10 @@
                 "containers": [
                     {
                         "env": [
+                            {
+                                "name": "MYSQL_DATABASE",
+                                "value": "testdb"
+                            },
                             {
                                 "name": "MYSQL_PASSWORD",
                                 "valueFrom": {
