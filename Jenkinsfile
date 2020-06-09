@@ -62,7 +62,7 @@ agent {
            echo "dc/mysql is available"
            
            echo "Creating Main Application"
-           openshift.raw("new-app ${REPO} --name=${APP_NAME} -l app=${APP_NAME} --strategy=source --env=APP_CONFIG=${APP_CONFIG} --env=APP_MODULE=${APP_MODULE} --env=MYSQL_NAME=${MYSQL_NAME} --env=MYSQL_DB=${MYSQL_DB} --output=yaml")
+           apply = openshift.apply(openshift.raw("new-app ${REPO} --name=${APP_NAME} -l app=${APP_NAME} --strategy=source --env=APP_CONFIG=${APP_CONFIG} --env=APP_MODULE=${APP_MODULE} --env=MYSQL_NAME=${MYSQL_NAME} --env=MYSQL_DB=${MYSQL_DB} --dry-run --output=yaml").actions[0].out)
            
            echo "Wait until dc/${APP_NAME} is available"
            def dcmainapp = openshift.selector('dc', "${APP_NAME}")
@@ -72,6 +72,11 @@ agent {
            openshift.raw("set env dc/${APP_NAME} --from=secret/my-secret")
            openshift.raw("expose svc ${APP_NAME}")
            openshift.raw("label dc/mysql app=${APP_NAME}")
+           openshift.raw("label dc/${APP_NAME} app.kubernetes.io/part-of=${APP_NAME}")
+           openshift.raw("label dc/mysql app.kubernetes.io/part-of=${APP_NAME}")
+           openshift.raw("annotate dc/${APP_NAME} app.openshift.io/connects-to=mysql")
+
+
 
           }
          }
