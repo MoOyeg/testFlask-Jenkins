@@ -53,20 +53,27 @@ agent {
        script {
          openshift.withCluster() {
            openshift.withProject( "${DEV_PROJECT}" ){
-            // def app = openshift.newApp('mysql')  
-            // def dc = app.narrow('dc')
-            // def dcmap = dc.object()           
-            // openshift.apply(dcmap)
+           echo "Creating Mysql Application"
            def fromJSON = openshift.create( readFile( 'mysql.json' ) )
+           
            echo "Wait until dc/mysql is available"
-           def dc = openshift.selector('dc', "mysql")
-           dc.rollout().status()
+           def dc-mysql = openshift.selector('dc', "mysql")
+           dc-mysql.rollout().status()
            echo "dc/mysql is available"
-           apply = openshift.apply(openshift.raw("new-app ${REPO} --name=${APP_NAME} -l app=${APP_NAME} --strategy=source --env=APP_CONFIG=${APP_CONFIG} --env=APP_MODULE=${APP_MODULE} --env=MYSQL_NAME=${MYSQL_NAME} --env=MYSQL_DB=${MYSQL_DB} --output=yaml").actions[0].out)
+           
+           echo "Creating Main Application"
            openshift.raw("new-app ${REPO} --name=${APP_NAME} -l app=${APP_NAME} --strategy=source --env=APP_CONFIG=${APP_CONFIG} --env=APP_MODULE=${APP_MODULE} --env=MYSQL_NAME=${MYSQL_NAME} --env=MYSQL_DB=${MYSQL_DB} --output=yaml")
-           //def fromJSON2 = openshift.create( readFile( 'app.json' ) )
-           echo "attempt"
-                      }
+           
+           echo "Wait until dc/${APP_NAME} is available"
+           def dc-mainapp = openshift.selector('dc', "${APP_NAME}")
+           dc-mainapp.rollout().status()
+           echo "dc/${APP_NAME} is available"
+          
+           openshift.raw("set env dc/${APP_NAME} --from=secret/my-secret")
+           openshift.raw("expose svc ${APP_NAME}")
+           openshift.raw("label dc/mysql app=${APP_NAME}")
+
+          }
          }
        }
 
