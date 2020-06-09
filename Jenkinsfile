@@ -63,7 +63,9 @@ agent {
            dc.rollout().status()
            echo "dc/mysql is available"
            apply = openshift.apply(openshift.raw("new-app ${REPO} --name=${APP_NAME} -l app=${APP_NAME} --strategy=source --env=APP_CONFIG=${APP_CONFIG} --env=APP_MODULE=${APP_MODULE} --env=MYSQL_NAME=${MYSQL_NAME} --env=MYSQL_DB=${MYSQL_DB} --output=yaml").actions[0].out)
+           openshift.raw("new-app ${REPO} --name=${APP_NAME} -l app=${APP_NAME} --strategy=source --env=APP_CONFIG=${APP_CONFIG} --env=APP_MODULE=${APP_MODULE} --env=MYSQL_NAME=${MYSQL_NAME} --env=MYSQL_DB=${MYSQL_DB} --output=yaml")
            //def fromJSON2 = openshift.create( readFile( 'app.json' ) )
+           echo "attempt"
                       }
          }
        }
