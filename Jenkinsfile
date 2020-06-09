@@ -53,10 +53,11 @@ agent {
        script {
          openshift.withCluster() {
            openshift.withProject( "${DEV_PROJECT}" ){
-             def app = openshift.newApp('mysql')  
-             def dc = app.narrow('dc')
-             def dcmap = dc.object()           
-             openshift.apply(dcmap)
+            // def app = openshift.newApp('mysql')  
+            // def dc = app.narrow('dc')
+            // def dcmap = dc.object()           
+            // openshift.apply(dcmap)
+           def fromJSON = openshift.create( readFile( 'mysql.json' ) )
            }
          }
        }
