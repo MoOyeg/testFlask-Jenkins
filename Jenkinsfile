@@ -36,7 +36,7 @@ agent {
 
     stage('Run Unit Testing') {
      steps {
-       echo "Starting Unit Testing}"
+       echo "Starting Unit Testing"
        script {
          try {
            sh "python ./testFlask/test.py"
@@ -62,9 +62,8 @@ agent {
            def dc = openshift.selector('dc', "mysql")
            dc.rollout().status()
            echo "dc/mysql is available"
-           def fromJSON = openshift.create( readFile( 'app.json' ) )
-           
-           }
+           //def fromJSON = openshift.create( readFile( 'app.json' ) )
+                      }
          }
        }
 
