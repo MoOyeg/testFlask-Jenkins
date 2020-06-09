@@ -57,16 +57,16 @@ agent {
            def fromJSON = openshift.create( readFile( 'mysql.json' ) )
            
            echo "Wait until dc/mysql is available"
-           def dc-mysql = openshift.selector('dc', "mysql")
-           dc-mysql.rollout().status()
+           def dcmysql = openshift.selector('dc', "mysql")
+           dcmysql.rollout().status()
            echo "dc/mysql is available"
            
            echo "Creating Main Application"
            openshift.raw("new-app ${REPO} --name=${APP_NAME} -l app=${APP_NAME} --strategy=source --env=APP_CONFIG=${APP_CONFIG} --env=APP_MODULE=${APP_MODULE} --env=MYSQL_NAME=${MYSQL_NAME} --env=MYSQL_DB=${MYSQL_DB} --output=yaml")
            
            echo "Wait until dc/${APP_NAME} is available"
-           def dc-mainapp = openshift.selector('dc', "${APP_NAME}")
-           dc-mainapp.rollout().status()
+           def dcmainapp = openshift.selector('dc', "${APP_NAME}")
+           dcmainapp.rollout().status()
            echo "dc/${APP_NAME} is available"
           
            openshift.raw("set env dc/${APP_NAME} --from=secret/my-secret")
