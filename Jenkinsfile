@@ -56,6 +56,9 @@ agent {
            echo "Creating Mysql Application"
            def fromJSON = openshift.create( readFile( 'mysql.json' ) )
            
+           echo "Creating Mysql Service"
+           def fromJSON2 = openshift.create( readFile( 'mysql-svc.json' ) )
+
            echo "Wait until dc/mysql is available"
            def dcmysql = openshift.selector('dc', "mysql")
            dcmysql.rollout().status()
@@ -65,7 +68,8 @@ agent {
            apply = openshift.apply(openshift.raw("new-app ${REPO} --name=${APP_NAME} -l app=${APP_NAME} --strategy=source --env=APP_CONFIG=${APP_CONFIG} --env=APP_MODULE=${APP_MODULE} --env=MYSQL_NAME=${MYSQL_NAME} --env=MYSQL_DB=${MYSQL_DB} --dry-run --output=yaml").actions[0].out)
                
            openshift.raw("set env dc/${APP_NAME} --from=secret/my-secret")
-           openshift.raw("expose svc ${APP_NAME}")
+           openshift.raw("expose svc/${APP_NAME}")
+           openshift.raw("expose svc/mysql")
            openshift.raw("label dc/mysql app=${APP_NAME}")
            openshift.raw("label dc/${APP_NAME} app.kubernetes.io/part-of=${APP_NAME}")
            openshift.raw("label dc/mysql app.kubernetes.io/part-of=${APP_NAME}")
@@ -75,6 +79,7 @@ agent {
            def dcmainapp = openshift.selector('dc', "${APP_NAME}")
            dcmainapp.rollout().status()
            echo "dc/${APP_NAME} is available"
+
           }
          }
        }
