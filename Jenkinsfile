@@ -62,6 +62,7 @@ agent {
            def dc = openshift.selector('dc', "mysql")
            dc.rollout().status()
            echo "dc/mysql is available"
+           def fromJSON = openshift.create( readFile( 'app.json' ) )
            
            }
          }
