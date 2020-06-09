@@ -75,9 +75,6 @@ agent {
            openshift.raw("label dc/${APP_NAME} app.kubernetes.io/part-of=${APP_NAME}")
            openshift.raw("label dc/mysql app.kubernetes.io/part-of=${APP_NAME}")
            openshift.raw("annotate dc/${APP_NAME} app.openshift.io/connects-to=mysql")
-
-
-
           }
          }
        }
@@ -85,7 +82,25 @@ agent {
       }     
     }
     
-    
+    stage('Run System Testing') {
+     steps {
+       echo "Starting System Testing"
+       script {
+         echo "Obtain ${APP_NAME} service"
+         def svc_name = "http://${APP_NAME}.${DEV_PROJECT}.svc:8080"
+        //def latestDeploymentVersion = openshift.selector('dc',"simple-python").object().status.latestVersion       
+         echo "Test Application Status Code == 200"
+         status_code1 = sh "curl -s -o /dev/null -w \"%{http_code}\" ${svc_name}"
+         echo "${status_code1}"
+         if ( ${status_code1} == "200" ){
+           echo "Application Passed Service Response Test"
+         } else {
+           error("Application Failed Service Response Test")
+         }
+
+       }
+      }     
+    }  
    
   }
 }
