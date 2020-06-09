@@ -97,15 +97,37 @@ agent {
          echo "Test Application Status Code == 200"         
          status_code1 = sh (script: "curl -s -o /dev/null -w \"%{http_code}\" ${svc_name}",returnStdout: true)
          echo "${status_code1}"
-         //if ( "${status_code1}" == "200" ){
-         //  echo "Application Passed Service Response Test"
-         //} else {
-         //  error("Application Failed Service Response Test")
-         //}
+         if ( "${status_code1}" == "200" ){
+           echo "Application Passed Service Response Test"
+         } else {
+           error("Application Failed Service Response Test")
+         }
 
        }
+      }           
+    } 
+  
+    stage('approval') {
+        timeout(time: 30, unit: 'DAYS') {
+                input message: "Promote Application to Production?"
+            }
+    }
+
+    stage('Promoting Application Code to Production') {
+     steps {
+       echo "Tagging Application Code For Stable Production"
+       script {
+         openshift.tag( '${DEV_PROJECT}/${APP_NAME}:version', '${PROD_PROJECT}/${APP_NAME}:version')
+
+       echo "Application Promoted to Production"
+       }
       }     
-    }  
+    }
+    
+
+
+
+
    
   }
 }
