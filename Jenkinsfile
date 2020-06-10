@@ -108,8 +108,10 @@ agent {
     } 
     
     stage('Approve Promotion to Production') {
-      timeout(time: 30, unit: 'DAYS') {
-      input message: "Promote Application to Production?"
+      steps {
+        timeout(time: 30, unit: 'DAYS') {
+        input message: "Promote Application to Production?"
+      }
      }
     }
 
