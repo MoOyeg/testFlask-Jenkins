@@ -131,7 +131,9 @@ agent {
      steps {
        echo "Removing Deployments and Services for project ${DEV_PROJECT}"
        script {
-         openshift.raw("delete all --all -n ${DEV_PROJECT}")
+         openshift.withCluster() {
+           openshift.raw("delete all --all -n ${DEV_PROJECT}")
+         }
        echo "Application Promoted to Production"
        }
       }     
