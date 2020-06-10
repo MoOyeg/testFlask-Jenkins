@@ -119,8 +119,9 @@ agent {
      steps {
        echo "Tagging Application Code For Stable Production"
        script {
+         openshift.withCluster() {
          openshift.tag( '${DEV_PROJECT}/${APP_NAME}:latest', '${PROD_PROJECT}/${APP_NAME}:latest')
-
+         }
        echo "Application Promoted to Production"
        }
       }     
