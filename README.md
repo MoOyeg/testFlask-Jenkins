@@ -114,7 +114,7 @@ metadata: []" | oc apply -f - -n $JENKINS_NAMESPACE
 - We can confirm that prod version got updated with new application image<br/>
 
 8 **This pipeline can also be automically started with a code change via a webhook**<br/>
-- We can add a webhook by
-```oc set triggers bc/$APP_NAME-pipeline --from-github -n $JENKINS_NAMESPACE
+- We can add a webhook by<br/>
+```oc set triggers bc/$APP_NAME-pipeline --from-github -n $JENKINS_NAMESPACE```
 
 
