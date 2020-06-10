@@ -119,8 +119,18 @@ agent {
      steps {
        echo "Tagging Application Code For Stable Production"
        script {
-         openshift.tag( '${DEV_PROJECT}/${APP_NAME}:version', '${PROD_PROJECT}/${APP_NAME}:version')
+         openshift.tag( '${DEV_PROJECT}/${APP_NAME}:latest', '${PROD_PROJECT}/${APP_NAME}:latest')
 
+       echo "Application Promoted to Production"
+       }
+      }     
+    }
+
+    stage('Remove all Deployments and Services in Testing Project') {
+     steps {
+       echo "Removing Deployments and Services for project ${DEV_PROJECT}"
+       script {
+         openshift.raw("delete all --all -n ${DEV_PROJECT}")
        echo "Application Promoted to Production"
        }
       }     
