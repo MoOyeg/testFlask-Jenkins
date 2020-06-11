@@ -35,13 +35,13 @@ So this example assumes a pipeline scenario where there is a running production 
   ```oc create secret generic my-secret --from-literal=MYSQL_USER=$MYSQL_USER --from-literal=MYSQL_PASSWORD=$MYSQL_PASSWORD -n $NAMESPACE_PROD```<br/>
   
   - Create our Database in Production<br/>
-  ```oc new-app $MYSQL_NAME --env=MYSQL_DATABASE=$MYSQL_DB -l db=mysql -l app=testflask -n $NAMESPACE_PROD```<br/>
+  ```oc new-app $MYSQL_HOST --env=MYSQL_DATABASE=$MYSQL_DB -l db=mysql -l app=testflask -n $NAMESPACE_PROD```<br/>
   
   - Set our Secret on the Production Database<br/>
-  ```oc set env dc/$MYSQL_NAME --from=secret/my-secret -n $NAMESPACE_PROD```<br/>
+  ```oc set env dc/$MYSQL_HOST --from=secret/my-secret -n $NAMESPACE_PROD```<br/>
    
   - Create our Production Application<br/>
-  ```oc new-app https://github.com/MoOyeg/testFlask.git --name=$APP_NAME -l app=testflask --strategy=source --env=APP_CONFIG=gunicorn.conf.py --env=APP_MODULE=testapp:app --env=MYSQL_NAME=$MYSQL_NAME --env=MYSQL_DB=$MYSQL_DB -n $NAMESPACE_PROD```<br/>
+  ```oc new-app https://github.com/MoOyeg/testFlask.git --name=$APP_NAME -l app=testflask --strategy=source --env=APP_CONFIG=gunicorn.conf.py --env=APP_MODULE=testapp:app --env=MYSQL_HOST=$MYSQL_HOST --env=MYSQL_DB=$MYSQL_DB -n $NAMESPACE_PROD```<br/>
   
   - Set our Secret on the Production Application<br/>
   ```oc set env dc/$APP_NAME --from=secret/my-secret -n $NAMESPACE_PROD```
@@ -52,8 +52,8 @@ So this example assumes a pipeline scenario where there is a running production 
   - Label our Projects for the Development Console
   ```
      oc label dc/$APP_NAME app.kubernetes.io/part-of=$APP_NAME -n $NAMESPACE_PROD
-     oc label dc/$MYSQL_NAME app.kubernetes.io/part-of=$APP_NAME -n $NAMESPACE_PROD
-     oc annotate dc/$APP_NAME app.openshift.io/connects-to=$MYSQL_NAME -n $NAMESPACE_PROD
+     oc label dc/$MYSQL_HOST app.kubernetes.io/part-of=$APP_NAME -n $NAMESPACE_PROD
+     oc annotate dc/$APP_NAME app.openshift.io/connects-to=$MYSQL_HOST -n $NAMESPACE_PROD
   ```
   
 4 **Create Jenkins Slave for Python**<br/>
@@ -101,7 +101,7 @@ metadata: []" | oc apply -f - -n $JENKINS_NAMESPACE
 --env=REPO="https://github.com/MoOyeg/testFlask.git" \
 --env=DEV_PROJECT=$NAMESPACE_DEV --env=APP_NAME=$APP_NAME \
 --env=APP_CONFIG=$APP_CONFIG --env=APP_MODULE=$APP_MODULE \
---env=MYSQL_NAME=$MYSQL_NAME --env=MYSQL_DB=$MYSQL_DB --env=PROD_PROJECT=$NAMESPACE_PROD -n $JENKINS_NAMESPACE
+--env=MYSQL_HOST=$MYSQL_HOST --env=MYSQL_DB=$MYSQL_DB --env=PROD_PROJECT=$NAMESPACE_PROD -n $JENKINS_NAMESPACE
 ```
 7 **Start build in Jenkins**
 - We can start build using<br/>
