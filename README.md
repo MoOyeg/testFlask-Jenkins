@@ -92,7 +92,28 @@ items:
         jenkinsfilePath: Jenkinsfile
 kind: List
 metadata: []" | oc apply -f - -n $JENKINS_NAMESPACE
-```
+```<br/>
+  - On newer cluster versions use<br/>
+  ```
+  echo """
+apiVersion: build.openshift.io/v1
+kind: BuildConfig
+metadata:
+  name: "$APP_NAME-pipeline"
+  namespace: $JENKINS_NAMESPACE
+spec:
+  source:
+    git:
+      ref: master
+      uri: 'https://github.com/MoOyeg/testFlask-Jenkins.git'
+    type: Git
+  strategy:
+    type: "JenkinsPipeline"
+    jenkinsPipelineStrategy:
+      jenkinsfilePath: Jenkinsfile
+""" | oc create -f -
+  ```<br/>
+
 6 **Pass our variables to our pipeline, they will show up as parameters in jenkins**<br/>
 - Set environment  variables on BuildConfig<br/>
 ```
