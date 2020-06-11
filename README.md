@@ -94,9 +94,9 @@ kind: List
 metadata: []" | oc apply -f - -n $JENKINS_NAMESPACE
 ```
 <br/>
-  - On newer cluster versions use<br/>
-  ```
-  echo """
+ - On newer cluster versions use <br/>
+
+```echo """
 apiVersion: build.openshift.io/v1
 kind: BuildConfig
 metadata:
@@ -113,8 +113,8 @@ spec:
     jenkinsPipelineStrategy:
       jenkinsfilePath: Jenkinsfile
 """ | oc create -f -
-  ```
-  <br/>
+```
+<br/>
 
 6 **Pass our variables to our pipeline, they will show up as parameters in jenkins**<br/>
 - Set environment  variables on BuildConfig<br/>
