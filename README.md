@@ -59,7 +59,7 @@ So this example assumes a pipeline scenario where there is a running production 
 4 **Create Jenkins Slave for Python**<br/>
 The Jenkins slave will be used to run the jenkins pipeline, while not necessary to always create your own slave as 
 Openshift comes out of the box with some, I am using this example to show you can build yours and if you have dependencies 
-to test or build your application you can add them into your image.<br/>
+to test or build your application you can add them into your image.I am using the Dockerfile above to build my image, because the image uses an image in registry.redhat.io remember to create a service account, create a service account secret and link that secret to your builder service account in Jenkins, please see https://access.redhat.com/documentation/en-us/openshift_container_platform/3.11/html/configuring_clusters/install-config-configuring-red-hat-registry<br/>
   - Pass DockerFile Value into Variable<br/>
   ```export PYTHON_DOCKERFILE=$(curl https://raw.githubusercontent.com/MoOyeg/testFlask-Jenkins/master/Dockerfile)```<br/>
 
