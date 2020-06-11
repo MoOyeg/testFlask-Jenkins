@@ -92,7 +92,8 @@ items:
         jenkinsfilePath: Jenkinsfile
 kind: List
 metadata: []" | oc apply -f - -n $JENKINS_NAMESPACE
-```<br/>
+```
+<br/>
   - On newer cluster versions use<br/>
   ```
   echo """
@@ -112,7 +113,8 @@ spec:
     jenkinsPipelineStrategy:
       jenkinsfilePath: Jenkinsfile
 """ | oc create -f -
-  ```<br/>
+  ```
+  <br/>
 
 6 **Pass our variables to our pipeline, they will show up as parameters in jenkins**<br/>
 - Set environment  variables on BuildConfig<br/>
