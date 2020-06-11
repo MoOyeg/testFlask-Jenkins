@@ -96,7 +96,8 @@ metadata: []" | oc apply -f - -n $JENKINS_NAMESPACE
 <br/>
  - On newer cluster versions use <br/>
 
-```echo """
+```
+echo """
 apiVersion: build.openshift.io/v1
 kind: BuildConfig
 metadata:
