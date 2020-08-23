@@ -39,13 +39,13 @@ So this example assumes a pipeline scenario where there is a running production 
   ```oc create secret generic my-secret --from-literal=MYSQL_USER=$MYSQL_USER --from-literal=MYSQL_PASSWORD=$MYSQL_PASSWORD -n $NAMESPACE_PROD```<br/>
   
   - Create our Database in Production<br/>
-  ```oc new-app $MYSQL_HOST --env=MYSQL_DATABASE=$MYSQL_DB -l db=mysql -l app=testflask -n $NAMESPACE_PROD```<br/>
+  ```oc new-app $MYSQL_HOST --env=MYSQL_DATABASE=$MYSQL_DB -l db=mysql -l app=testflask --as-deployment-config=true -n $NAMESPACE_PROD```<br/>
   
   - Set our Secret on the Production Database<br/>
   ```oc set env dc/$MYSQL_HOST --from=secret/my-secret -n $NAMESPACE_PROD```<br/>
    
   - Create our Production Application<br/>
-  ```oc new-app https://github.com/MoOyeg/testFlask.git --name=$APP_NAME -l app=testflask --strategy=source --env=APP_CONFIG=gunicorn.conf.py --env=APP_MODULE=testapp:app --env=MYSQL_HOST=$MYSQL_HOST --env=MYSQL_DB=$MYSQL_DB -n $NAMESPACE_PROD```<br/>
+  ```oc new-app https://github.com/MoOyeg/testFlask.git --name=$APP_NAME -l app=testflask --strategy=source --env=APP_CONFIG=gunicorn.conf.py --env=APP_MODULE=testapp:app --env=MYSQL_HOST=$MYSQL_HOST --env=MYSQL_DB=$MYSQL_DB --as-deployment-config=true -n $NAMESPACE_PROD```<br/>
   
   - Set our Secret on the Production Application<br/>
   ```oc set env dc/$APP_NAME --from=secret/my-secret -n $NAMESPACE_PROD```
