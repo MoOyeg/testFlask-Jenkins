@@ -65,7 +65,7 @@ agent {
            echo "dc/mysql is available"
            
            echo "Creating Main Application"
-           apply = openshift.apply(openshift.raw("new-app ${REPO} --name=${APP_NAME} -l app=${APP_NAME} --strategy=source --env=APP_CONFIG=${APP_CONFIG} --env=APP_MODULE=${APP_MODULE} --env=MYSQL_HOST=${MYSQL_HOST} --env=MYSQL_DB=${MYSQL_DB} --dry-run --output=yaml").actions[0].out)
+           apply = openshift.apply(openshift.raw("new-app ${REPO} --name=${APP_NAME} -l app=${APP_NAME} --strategy=source --env=APP_CONFIG=${APP_CONFIG} --env=APP_MODULE=${APP_MODULE} --env=MYSQL_HOST=${MYSQL_HOST} --env=MYSQL_DB=${MYSQL_DB} --as-deployment-config=true --dry-run --output=yaml").actions[0].out)
                
            openshift.raw("set env dc/${APP_NAME} --from=secret/my-secret")
            openshift.raw("expose svc/${APP_NAME}")
