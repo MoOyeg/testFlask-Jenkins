@@ -6,6 +6,8 @@ So this example assumes a pipeline scenario where there is a running production 
 
 ### Steps to Run<br/>
 **Steps 1 is only necessary if you don't have jenkins installed and want to install it in the cluster**<br/>
+0 **Source Sample Environment**<br/>
+```eval "$(curl https://https://raw.githubusercontent.com/MoOyeg/testFlask/master/sample_env)"```<br/>
 
 1 **Create a new project and start a jenkins pod in openhshift,we will create a new project also for jenkins**<br/>
   - Create a Jenkins namespace<br/>
