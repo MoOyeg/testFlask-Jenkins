@@ -68,7 +68,7 @@ agent {
            //apply = openshift.apply(openshift.raw("new-app ${REPO} --name=${APP_NAME} -l app=${APP_NAME} --strategy=source --env=APP_CONFIG=${APP_CONFIG} --env=APP_MODULE=${APP_MODULE} --env=MYSQL_HOST=${MYSQL_HOST} --env=MYSQL_DATABASE=${MYSQL_DATABASE} --as-deployment-config=true --dry-run --output=yaml").actions[0].out)
            apply = openshift.apply(openshift.raw("create configmap frontend-config --dry-run --from-literal=test=test --output=yaml").actions[0].out)
            echo "test"
-           apply = openshift.apply(openshift.raw("new-app https://github.com/MoOyeg/testFlask.git --name=testflask -l app=testflask --strategy=source --env=APP_CONFIG=gunicorn.conf.py --env=APP_MODULE=testapp:app --env=MYSQL_HOST=mysql --env=MYSQL_DATABASE=testdb --as-deployment-config=true --dry-run --output=yaml").actions[0].out)
+           //apply = openshift.apply(openshift.raw("new-app https://github.com/MoOyeg/testFlask.git --name=testflask -l app=testflask --strategy=source --env=APP_CONFIG=gunicorn.conf.py --env=APP_MODULE=testapp:app --env=MYSQL_HOST=mysql --env=MYSQL_DATABASE=testdb --as-deployment-config=true --dry-run --output=yaml").actions[0].out)
            echo "Created Main Application"
              
            echo "Configure Main Application"
