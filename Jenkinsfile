@@ -66,7 +66,9 @@ agent {
            
            echo "Creating Main Application"
            apply = openshift.apply(openshift.raw("new-app ${REPO} --name=${APP_NAME} -l app=${APP_NAME} --strategy=source --env=APP_CONFIG=${APP_CONFIG} --env=APP_MODULE=${APP_MODULE} --env=MYSQL_HOST=${MYSQL_HOST} --env=MYSQL_DATABASE=${MYSQL_DATABASE} --as-deployment-config=true --dry-run --output=yaml").actions[0].out)
-               
+           echo "Created Main Application"
+             
+           echo "Configure Main Application"
            openshift.raw("set env dc/${APP_NAME} --from=secret/my-secret")
            openshift.raw("expose svc/${APP_NAME}")
            openshift.raw("expose svc/mysql")
@@ -74,6 +76,7 @@ agent {
            openshift.raw("label dc/${APP_NAME} app.kubernetes.io/part-of=${APP_NAME}")
            openshift.raw("label dc/mysql app.kubernetes.io/part-of=${APP_NAME}")
            openshift.raw("annotate dc/${APP_NAME} app.openshift.io/connects-to=mysql")
+           echo "Configured Main Application"
 
            echo "Wait until dc/${APP_NAME} is available"
            def dcmainapp = openshift.selector('dc', "${APP_NAME}")
