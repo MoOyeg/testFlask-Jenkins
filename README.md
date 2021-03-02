@@ -67,12 +67,9 @@ The Jenkins slave will be used to run the jenkins pipeline, while not necessary 
 Openshift comes out of the box with some, I am using this example to show you can build yours and if you have dependencies 
 to test or build your application you can add them into your image.I am using the Dockerfile above to build my image, because the image uses an image in registry.redhat.io remember to create a service account, create a service account secret and link that secret to your builder service account in Jenkins, please see https://access.redhat.com/documentation/en-us/openshift_container_platform/3.11/html/configuring_clusters/install-config-configuring-red-hat-registry<br/>
 Also you might not be able to build this image if your cluster is not entitled, please do this at cloud.redhat.com. If you have redhat subscriptions but have not entitled your cluster you can use this process to pass your entitlement into the BuildConfig, see https://docs.openshift.com/container-platform/4.4/builds/running-entitled-builds.html<br/>
-If you want to want to use an image that is available without a subscription but less secure image use the Docker_alt example instead. 
+To build a jenkins image without a subscription please read https://github.com/openshift/jenkins. 
   - Pass DockerFile Value into Variable(Openshift Subscription Required)<br/>
   ```export PYTHON_DOCKERFILE=$(curl https://raw.githubusercontent.com/MoOyeg/testFlask-Jenkins/master/Dockerfile)```<br/>
-
-  - Pass DockerFile Value into Variable(Openshift Subscription Not Required)<br/>
-  ```export PYTHON_DOCKERFILE=$(curl https://raw.githubusercontent.com/MoOyeg/testFlask-Jenkins/master/Dockerfile_alt)```<br/>
 
   - Build Slave Image in Jenkins Project<br/>
   ```oc new-build --strategy=docker -D="$PYTHON_DOCKERFILE" --name=python-jenkins -n $JENKINS_NAMESPACE```<br/>
