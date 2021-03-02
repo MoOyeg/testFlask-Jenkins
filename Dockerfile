@@ -3,5 +3,5 @@ USER root
 RUN curl -o get-pip.py https://bootstrap.pypa.io/get-pip.py \
 && python get-pip.py \
 && curl -o requirements.txt https://raw.githubusercontent.com/MoOyeg/testFlask/master/requirements.txt \
-&& pip install -r requirements.txt
+&& pip install -r requirements.txt && rpm --setperms -a
 USER 1001
