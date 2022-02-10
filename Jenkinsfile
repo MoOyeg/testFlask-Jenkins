@@ -1,7 +1,7 @@
 pipeline {
 agent {
   kubernetes {
-    label "python-agent"
+    label "$JENKINS_LABEL"
     cloud "openshift"
     containerTemplate {
       name "jnlp"
