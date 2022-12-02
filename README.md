@@ -28,13 +28,13 @@ So this example assumes a pipeline scenario where there is a running production 
   ```oc new-project $NAMESPACE_PROD```<br/>
  
   - Add Permissions for Jenkins service account to Projects<br/>
-  ```oc adm policy add-cluster-role-to-user edit system:serviceaccount:$JENKINS_NAMESPACE:jenkins -n $NAMESPACE_DEV```<br/>
-  ```oc adm policy add-cluster-role-to-user edit system:serviceaccount:$JENKINS_NAMESPACE:jenkins -n $NAMESPACE_PROD```<br/>
-  ```oc adm policy add-cluster-role-to-user edit system:serviceaccount:$JENKINS_NAMESPACE:jenkins -n $JENKINS_NAMESPACE```<br/>
+  ```oc policy add-role-to-user edit system:serviceaccount:$JENKINS_NAMESPACE:jenkins -n $NAMESPACE_DEV```<br/>
+  ```oc policy add-role-to-user edit system:serviceaccount:$JENKINS_NAMESPACE:jenkins -n $NAMESPACE_PROD```<br/>
+  ```oc policy add-role-to-user edit system:serviceaccount:$JENKINS_NAMESPACE:jenkins -n $JENKINS_NAMESPACE```<br/>
   
   - Add Permissions for Default service accountin jenkins namespace to Projects<br/>
-  ```oc adm policy add-cluster-role-to-user edit system:serviceaccount:$JENKINS_NAMESPACE:default -n $NAMESPACE_DEV```<br/>
-  ```oc adm policy add-cluster-role-to-user edit system:serviceaccount:$JENKINS_NAMESPACE:default -n $NAMESPACE_PROD```<br/>
+  ```oc policy add-role-to-user edit system:serviceaccount:$JENKINS_NAMESPACE:default -n $NAMESPACE_DEV```<br/>
+  ```oc policy add-role-to-user edit system:serviceaccount:$JENKINS_NAMESPACE:default -n $NAMESPACE_PROD```<br/>
   
   - Create our Infrastructure Secret in our Development and Production<br/>
   ```oc create secret generic my-secret --from-literal=MYSQL_USER=$MYSQL_USER --from-literal=MYSQL_PASSWORD=$MYSQL_PASSWORD -n $NAMESPACE_DEV```<br/>
