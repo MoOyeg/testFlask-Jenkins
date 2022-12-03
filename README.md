@@ -80,9 +80,11 @@ To build a jenkins image without a subscription please read https://github.com/o
   - You can Login to Jenkins WebPage to see how it is configures, get jenkins route by<br/>
   ```oc get route jenkins -n $JENKINS_NAMESPACE -o jsonpath='{ .spec.host }' ```
 
-5 **Create Our BuildConfig with our buildstrategy as Pipeline**<br/>
-  - We can create our BuildConfig below<br/>
-  ```
+5 **Create Our BuildConfig with our buildstrategy as Pipeline**  
+
+- We can create our BuildConfig below  
+
+```bash
   echo "apiVersion: v1
 items:
 - kind: "BuildConfig"
@@ -101,10 +103,10 @@ items:
 kind: List
 metadata: []" | oc apply -f - -n $JENKINS_NAMESPACE
 ```
-<br/>
- - On newer cluster versions use <br/>
 
-```
+- On newer cluster versions use
+
+```bash
 echo """
 apiVersion: build.openshift.io/v1
 kind: BuildConfig
@@ -123,11 +125,12 @@ spec:
       jenkinsfilePath: Jenkinsfile
 """ | oc create -f -
 ```
-<br/>
 
-6 **Pass our variables to our pipeline, they will show up as parameters in jenkins**<br/>
-- Set environment  variables on BuildConfig<br/>
-```
+6 **Pass our variables to our pipeline, they will show up as parameters in jenkins**  
+
+- Set environment  variables on BuildConfig
+
+```bash
   oc set env bc/$APP_NAME-pipeline \
 --env=JENKINS_NAMESPACE=$JENKINS_NAMESPACE \
 --env=REPO="https://github.com/MoOyeg/testFlask.git" \
@@ -135,15 +138,18 @@ spec:
 --env=APP_CONFIG=$APP_CONFIG --env=APP_MODULE=$APP_MODULE \
 --env=MYSQL_HOST=$MYSQL_HOST --env=MYSQL_DATABASE=$MYSQL_DATABASE --env=PROD_PROJECT=$NAMESPACE_PROD -n $JENKINS_NAMESPACE
 ```
-7 **Start build in Jenkins**
-- We can start build using<br/>
-```oc start-build $APP_NAME-pipeline -n $JENKINS_NAMESPACE```<br/>
 
-- Log into Jenkins to follow the build, you can use the route provided earlier<br/>
+7 **Start build in Jenkins**  
 
-- Build has approval stage to simulate approval, we need to accept that to move forward<br/>
+- We can start build using
 
-- We can confirm that prod version got updated with new application image<br/>
+```oc start-build $APP_NAME-pipeline -n $JENKINS_NAMESPACE```
+
+- Log into Jenkins to follow the build, you can use the route provided earlier  
+
+- Build has approval stage to simulate approval, we need to accept that to move forward  
+
+- We can confirm that prod version got updated with new application image  
 
 8 **This pipeline can also be automically started with a code change via a webhook**<br/>
 - We can add a webhook by<br/>
