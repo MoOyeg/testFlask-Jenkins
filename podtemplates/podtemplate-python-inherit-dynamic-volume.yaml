@@ -16,11 +16,11 @@ data:
           <nodeSelector></nodeSelector>
           <containers>
             <org.csanchez.jenkins.plugins.kubernetes.ContainerTemplate>
-              <name>java</name>
+              <name>python</name>
               <image>image-registry.openshift-image-registry.svc:5000/1234-jenkins/python-jenkins:latest</image>
               <privileged>false</privileged>
               <alwaysPullImage>true</alwaysPullImage>
-              <workingDir>/home/jenkins/agent</workingDir>
+              <workingDir>/workdir</workingDir>
               <command>cat</command>
               <args></args>
               <ttyEnabled>true</ttyEnabled>

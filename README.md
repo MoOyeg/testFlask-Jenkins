@@ -151,8 +151,39 @@ spec:
 
 - We can confirm that prod version got updated with new application image  
 
-8 **This pipeline can also be automically started with a code change via a webhook**<br/>
-- We can add a webhook by<br/>
+8 **This pipeline can also be automically started with a code change via a webhook**  
+
+- We can add a webhook by  
+
 ```oc set triggers bc/$APP_NAME-pipeline --from-github -n $JENKINS_NAMESPACE```
 
+## Method2
 
+```bash
+echo """
+apiVersion: build.openshift.io/v1
+kind: BuildConfig
+metadata:
+  name: "$APP_NAME-pipeline-volume"
+  namespace: $JENKINS_NAMESPACE
+spec:
+  source:
+    git:
+      ref: working
+      uri: 'https://github.com/MoOyeg/testFlask-Jenkins.git'
+    type: Git
+  strategy:
+    type: "JenkinsPipeline"
+    jenkinsPipelineStrategy:
+      jenkinsfilePath: Jenkinsfile-with-volume
+""" | oc create -f -
+```
+
+```bash
+oc set env bc/$APP_NAME-pipeline-volume \
+--env=JENKINS_NAMESPACE=$JENKINS_NAMESPACE \
+--env=REPO="https://github.com/MoOyeg/testFlask.git" \
+--env=DEV_PROJECT=$NAMESPACE_DEV --env=APP_NAME=$APP_NAME \
+--env=APP_CONFIG=$APP_CONFIG --env=APP_MODULE=$APP_MODULE \
+--env=MYSQL_HOST=$MYSQL_HOST --env=MYSQL_DATABASE=$MYSQL_DATABASE --env=PROD_PROJECT=$NAMESPACE_PROD -n $JENKINS_NAMESPACE
+```
