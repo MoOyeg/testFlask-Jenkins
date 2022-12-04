@@ -21,7 +21,7 @@ data:
           </workspaceVolume>
           <volumes>
             <org.csanchez.jenkins.plugins.kubernetes.volumes.EmptyDirVolume>
-              <mountPath>/var/test</mountPath>
+              <mountPath>/var/test/data</mountPath>
               <memory>true</memory>
             </org.csanchez.jenkins.plugins.kubernetes.volumes.EmptyDirVolume>
           </volumes>

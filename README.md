@@ -160,6 +160,10 @@ spec:
 ## Method2
 
 ```bash
+oc create secret generic my-secret --from-literal=MYSQL_USER=$MYSQL_USER --from-literal=MYSQL_PASSWORD=$MYSQL_PASSWORD -n $JENKINS_NAMESPACE
+```
+
+```bash
 echo """
 apiVersion: build.openshift.io/v1
 kind: BuildConfig

@@ -93,7 +93,7 @@ agent {
         )
         echo "Workspace Volume obtained was ${VOLUME_PVC}"
         echo "Attach Volume ${VOLUME_PVC} to our MySQL DB"
-        sh "oc set volume dc/mysql --add --name=v1 -t pvc --claim-name=${VOLUME_PVC} --overwrite -n ${JENKINS_NAMESPACE}"
+        sh "oc set volume dc/mysql --add --name=v1 -t pvc --claim-name=${VOLUME_PVC} --mount-path=/var/test/data --overwrite -n ${JENKINS_NAMESPACE}"
         }
 
      }
