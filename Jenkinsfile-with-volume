@@ -82,6 +82,18 @@ agent {
 
       }     
     }
+
+    stage('Data Testing with Volumes') {
+     steps {
+      echo "Obtain Workspace Volume Location"
+        VOLUME_PVC = sh (
+          script: 'oc get pod/$(hostname) -o jsonpath=\'{$.spec.volumes[?(@.name == "workspace-volume")].persistentVolumeClaim.claimName}\'',
+          returnStdout: true
+        )
+        echo "${VOLUME_PVC}"
+     }
+
+    }
     
     stage('Run System Testing') {
      steps {
