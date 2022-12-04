@@ -91,8 +91,11 @@ agent {
           script: 'oc get pod/$(hostname) -o jsonpath=\'{$.spec.volumes[?(@.name == "workspace-volume")].persistentVolumeClaim.claimName}\'',
           returnStdout: true
         )
+        echo "Workspace Volume obtained was ${VOLUME_PVC}"
+        echo "Attach Volume ${VOLUME_PVC} to our MySQL DB"
+        sh 'oc set volume dc/mysql --add --name=v1 -t pvc --claim-name=${VOLUME_PVC} --overwrite -n ${DEV_PROJECT}'
         }
-        echo "${VOLUME_PVC}"
+
      }
     }
     
