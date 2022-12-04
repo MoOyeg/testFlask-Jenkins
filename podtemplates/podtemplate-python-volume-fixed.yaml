@@ -28,7 +28,7 @@ data:
           <containers>
             <org.csanchez.jenkins.plugins.kubernetes.ContainerTemplate>
               <name>jnlp</name>
-              <image>image-registry.openshift-image-registry.svc:5000/openshift/jenkins-agent-base-rhel8:latest</image>
+              <image>image-registry.openshift-image-registry.svc:5000/openshift/jenkins-agent-base:latest</image>
               <privileged>false</privileged>
               <alwaysPullImage>true</alwaysPullImage>
               <workingDir>/home/jenkins/agent</workingDir>
