@@ -47,7 +47,8 @@ agent {
     //    }
     //   }     
     // }
-
+    //You can run steps in different containers if you choose 
+    // with the container('container_name') but according to the docs it defaults to non-jnlp container which works for this use-case
     stage('Create Test Version of Application') {
      steps {
        script {
