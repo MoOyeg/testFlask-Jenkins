@@ -60,7 +60,7 @@ agent {
 
            //Get WorkSpace Volume Dynamic PVC
            VOLUME_PVC = sh (
-              script: "oc get pod/$(hostname) -o jsonpath='{$.spec.volumes[?(@.name == "workspace-volume")].persistentVolumeClaim.claimName}",
+              script: 'oc get pod/$(hostname) -o jsonpath=\'{$.spec.volumes[?(@.name == "workspace-volume")].persistentVolumeClaim.claimName}\'',
               returnStdout: true
             )
             //sh '''
