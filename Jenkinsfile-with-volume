@@ -44,7 +44,7 @@ agent {
      steps {
        script {
          openshift.withCluster() {
-           openshift.withProject( "${DEV_PROJECT}" ){
+           openshift.withProject( "${JENKINS_NAMESPACE}" ){
            echo "Creating Mysql Application"
            def fromJSON = openshift.create( readFile( 'mysql.json' ) )
            
@@ -93,7 +93,7 @@ agent {
         )
         echo "Workspace Volume obtained was ${VOLUME_PVC}"
         echo "Attach Volume ${VOLUME_PVC} to our MySQL DB"
-        sh "oc set volume dc/mysql --add --name=v1 -t pvc --claim-name=${VOLUME_PVC} --overwrite -n ${DEV_PROJECT}"
+        sh "oc set volume dc/mysql --add --name=v1 -t pvc --claim-name=${VOLUME_PVC} --overwrite -n ${JENKINS_NAMESPACE}"
         }
 
      }
@@ -104,7 +104,7 @@ agent {
        echo "Starting System Testing"
        script {
          echo "Obtain ${APP_NAME} service"
-         def svc_name = "http://${APP_NAME}.${DEV_PROJECT}.svc:8080"
+         def svc_name = "http://${APP_NAME}.${JENKINS_NAMESPACE}.svc:8080"
         //def latestDeploymentVersion = openshift.selector('dc',"simple-python").object().status.latestVersion       
          echo "Test Application Status Code == 200"         
          status_code1 = sh (script: "curl -s -o /dev/null -w \"%{http_code}\" ${svc_name}",returnStdout: true)
@@ -132,7 +132,7 @@ agent {
        echo "Tagging Application Code For Stable Production"
        script {
          openshift.withCluster() {
-         openshift.tag( '${DEV_PROJECT}/${APP_NAME}:latest', '${PROD_PROJECT}/${APP_NAME}:latest')
+         openshift.tag( '${JENKINS_NAMESPACE}/${APP_NAME}:latest', '${PROD_PROJECT}/${APP_NAME}:latest')
          }
        echo "Application Promoted to Production"
        }
@@ -141,14 +141,14 @@ agent {
 
     stage('Remove all Deployments and Services in Testing Project') {
      steps {
-       echo "Removing Deployments and Services for project ${DEV_PROJECT}"
+       echo "Removing Deployments and Services for project ${JENKINS_NAMESPACE}"
        script {
          openshift.withCluster() {
-           openshift.raw("delete dc/mysql -n ${DEV_PROJECT}")
-           openshift.raw("delete svc/mysql -n ${DEV_PROJECT}")
-           openshift.raw("delete dc/${APP_NAME} -n ${DEV_PROJECT}")
-           openshift.raw("delete svc/${APP_NAME} -n ${DEV_PROJECT}")
-           openshift.raw("delete route/${APP_NAME} -n ${DEV_PROJECT}")
+           openshift.raw("delete dc/mysql -n ${JENKINS_NAMESPACE}")
+           openshift.raw("delete svc/mysql -n ${JENKINS_NAMESPACE}")
+           openshift.raw("delete dc/${APP_NAME} -n ${JENKINS_NAMESPACE}")
+           openshift.raw("delete svc/${APP_NAME} -n ${JENKINS_NAMESPACE}")
+           openshift.raw("delete route/${APP_NAME} -n ${JENKINS_NAMESPACE}")
          }
        echo "Application Promoted to Production"
        }
