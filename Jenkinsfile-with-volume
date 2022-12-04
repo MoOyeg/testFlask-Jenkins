@@ -59,8 +59,10 @@ agent {
            echo "dc/mysql is available"
 
            //Get WorkSpace Volume Dynamic PVC
-           pvc = oc get pod/$(hostname) -o jsonpath='{$.spec.volumes[?(@.name == "workspace-volume")].persistentVolumeClaim.claimName}'
-           oc set volume dc/mysql --add --name=v1 -t pvc --claim-name=${pvc} --overwrite -n }.${DEV_PROJECT}
+           sh '''
+              pvc = oc get pod/$(hostname) -o jsonpath='{$.spec.volumes[?(@.name == "workspace-volume")].persistentVolumeClaim.claimName}'
+              oc set volume dc/mysql --add --name=v1 -t pvc --claim-name=${pvc} --overwrite -n }.${DEV_PROJECT}"
+              '''
 
            //Adding this Wait to Allow Review Volume Expectations
            timeout(time: 30, unit: 'DAYS') {
