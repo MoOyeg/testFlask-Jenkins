@@ -104,7 +104,7 @@ agent {
           returnStdout: true
         )        
         echo "Attempt to import data stored in WorkSpace Volume Pulled from Git"
-        sh "oc exec -n ${JENKINS_NAMESPACE} ${MYSQL_POD} -- mysql -u root < /var/test/data/workspace/${JENKINS_NAMESPACE}/${JENKINS_NAMESPACE}-${APP_NAME}-pipeline-volume/testdb.sql"
+        sh 'oc exec -n '${JENKINS_NAMESPACE} ${MYSQL_POD}' -t -- mysql -u root < /var/test/data/workspace/'${JENKINS_NAMESPACE}'/'${JENKINS_NAMESPACE}'-'${APP_NAME}'-pipeline-volume/testdb.sql'
         }
 
      }
