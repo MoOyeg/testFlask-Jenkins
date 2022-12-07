@@ -25,7 +25,7 @@ So this example assumes a pipeline scenario where there is a running production 
   ```
 
   Without Storage
-  
+
   ```bash
   oc new-app jenkins-ephemeral --param ENABLE_OAUTH=true --param MEMORY_LIMIT=2Gi --param DISABLE_ADMINISTRATIVE_MONITORS=true -n $JENKINS_NAMESPACE
   ```
@@ -179,7 +179,7 @@ spec:
 
 ### Create PodTemplates
 
-- PodTemplatesprovide a way to define the Pod Instance to run that will run the build process.Example here requires the use of a Storage Class that supports dynamic provisioning.
+- PodTemplatesprovide a way to define the Pod Instance to run that will run the build process.Example here requires the use of a Storage Class that supports dynamic provisioning.This Pipeline requires that you provide elevated privileged to the Jenkins serviceaccount to allow dynamic provisioning of the pvc.
 
 - Export your StorageClass Values
 
