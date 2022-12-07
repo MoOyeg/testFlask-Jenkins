@@ -7,7 +7,7 @@ metadata:
 data:
   template2: |-
         <org.csanchez.jenkins.plugins.kubernetes.PodTemplate>
-          <inheritFrom>dynamic-volume-efs</inheritFrom>
+          <inheritFrom>dynamic-volume-rwx</inheritFrom>
           <name>python-inherit-dynamic-volume</name>
           <instanceCap>2147483647</instanceCap>
           <idleMinutes>0</idleMinutes>

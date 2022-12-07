@@ -1,17 +1,17 @@
 kind: ConfigMap
 apiVersion: v1
 metadata:
-  name: dynamic-volume-efs
+  name: dynamic-volume-rwx
   labels:
     role: jenkins-agent
 data:
   template2: |-
         <org.csanchez.jenkins.plugins.kubernetes.PodTemplate>
           <inheritFrom></inheritFrom>
-          <name>dynamic-volume-efs</name>
+          <name>dynamic-volume-rwx</name>
           <instanceCap>2147483647</instanceCap>
           <idleMinutes>0</idleMinutes>
-          <label>dynamic-volume-efs</label>
+          <label>dynamic-volume-rwx</label>
           <serviceAccount>jenkins</serviceAccount>
           <containers>
             <org.csanchez.jenkins.plugins.kubernetes.ContainerTemplate>
@@ -32,9 +32,9 @@ data:
           </containers>
           <nodeSelector></nodeSelector>
           <workspaceVolume class="org.csanchez.jenkins.plugins.kubernetes.volumes.workspace.DynamicPVCWorkspaceVolume">
-            <storageClassName>sc-efs</storageClassName>
-            <requestsSize>200Mi</requestsSize>
-            <accessModes>ReadWriteMany</accessModes>
+            <storageClassName>${SC_NAME}</storageClassName>
+            <requestsSize>$PV_SIZE</requestsSize>
+            <accessModes>$ACCESS_MODE</accessModes>
           </workspaceVolume>
           <envVars/>
           <annotations/>

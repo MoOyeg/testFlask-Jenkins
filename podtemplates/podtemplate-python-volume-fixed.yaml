@@ -15,9 +15,9 @@ data:
           <serviceAccount>jenkins</serviceAccount>
           <nodeSelector></nodeSelector>
           <workspaceVolume class="org.csanchez.jenkins.plugins.kubernetes.volumes.workspace.DynamicPVCWorkspaceVolume">
-            <storageClassName>mo-test</storageClassName>
-            <requestsSize>200Mi</requestsSize>
-            <accessModes>ReadWriteMany</accessModes>
+            <storageClassName>${SC_NAME}</storageClassName>
+            <requestsSize>$PV_SIZE</requestsSize>
+            <accessModes>$ACCESS_MODE</accessModes>
           </workspaceVolume>
           <volumes>
             <org.csanchez.jenkins.plugins.kubernetes.volumes.EmptyDirVolume>
