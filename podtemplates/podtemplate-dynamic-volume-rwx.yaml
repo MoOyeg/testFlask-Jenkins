@@ -1,0 +1,43 @@
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: dynamic-volume-rwx
+  labels:
+    role: jenkins-agent
+data:
+  template2: |-
+        <org.csanchez.jenkins.plugins.kubernetes.PodTemplate>
+          <inheritFrom></inheritFrom>
+          <name>dynamic-volume-rwx</name>
+          <instanceCap>2147483647</instanceCap>
+          <idleMinutes>0</idleMinutes>
+          <label>dynamic-volume-rwx</label>
+          <serviceAccount>jenkins</serviceAccount>
+          <containers>
+            <org.csanchez.jenkins.plugins.kubernetes.ContainerTemplate>
+              <name>jnlp</name>
+              <image>image-registry.openshift-image-registry.svc:5000/openshift/jenkins-agent-base:latest</image>
+              <privileged>false</privileged>
+              <alwaysPullImage>true</alwaysPullImage>
+              <workingDir>/home/jenkins/agent</workingDir>
+              <command></command>
+              <args>\$(JENKINS_SECRET) \$(JENKINS_NAME)</args>
+              <ttyEnabled>false</ttyEnabled>
+              <resourceRequestCpu></resourceRequestCpu>
+              <resourceRequestMemory></resourceRequestMemory>
+              <resourceLimitCpu></resourceLimitCpu>
+              <resourceLimitMemory></resourceLimitMemory>
+              <envVars/>
+            </org.csanchez.jenkins.plugins.kubernetes.ContainerTemplate>
+          </containers>
+          <nodeSelector></nodeSelector>
+          <workspaceVolume class="org.csanchez.jenkins.plugins.kubernetes.volumes.workspace.DynamicPVCWorkspaceVolume">
+            <storageClassName>${SC_NAME}</storageClassName>
+            <requestsSize>$PV_SIZE</requestsSize>
+            <accessModes>$ACCESS_MODE</accessModes>
+          </workspaceVolume>
+          <envVars/>
+          <annotations/>
+          <imagePullSecrets/>
+          <nodeProperties/>
+        </org.csanchez.jenkins.plugins.kubernetes.PodTemplate>

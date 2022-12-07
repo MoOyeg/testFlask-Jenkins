@@ -1,17 +1,8 @@
 pipeline {
 agent {
   kubernetes {
-    label "python-agent"
+    inheritFrom 'python-inherit-dynamic-volume'
     cloud "openshift"
-    containerTemplate {
-      name "jnlp"
-      image "image-registry.openshift-image-registry.svc:5000/$JENKINS_NAMESPACE/python-jenkins:latest"  
-      resourceRequestMemory "500Mi"
-      resourceLimitMemory "500Mi"
-      resourceRequestCpu "300m"
-      resourceLimitCpu "300m"
-      alwaysPullImage "True"
-    }
   }
 }
 
@@ -53,7 +44,7 @@ agent {
      steps {
        script {
          openshift.withCluster() {
-           openshift.withProject( "${DEV_PROJECT}" ){
+           openshift.withProject( "${JENKINS_NAMESPACE}" ){
            echo "Creating Mysql Application"
            def fromJSON = openshift.create( readFile( 'mysql.json' ) )
            
@@ -91,13 +82,41 @@ agent {
 
       }     
     }
+
+    stage('Data Testing with Volumes') {
+     steps {
+      echo "Obtain Workspace Volume Location"
+        script {
+        VOLUME_PVC = sh (
+          script: 'oc get pod/$(hostname) -o jsonpath=\'{$.spec.volumes[?(@.name == "workspace-volume")].persistentVolumeClaim.claimName}\'',
+          returnStdout: true
+        )
+        echo "Workspace Volume obtained was ${VOLUME_PVC}"
+        echo "Attach Volume ${VOLUME_PVC} to our MySQL DB"
+        sh "oc set volume dc/mysql --add --name=v1 -t pvc --claim-name=${VOLUME_PVC} --mount-path=/var/test/data --overwrite -n ${JENKINS_NAMESPACE}"
+        
+        echo "Wait Till Pod Ready"
+        sh "oc rollout status dc/mysql -w -n ${JENKINS_NAMESPACE}"
+
+        echo "Get MySQL Pod Name"
+        MYSQL_POD= sh (
+          script: "oc get pods -l deploymentconfig=mysql -n ${JENKINS_NAMESPACE} -o name",
+          returnStdout: true
+        )        
+        echo "Attempt to import data stored in WorkSpace Volume Pulled from Git"
+        sh "echo \"mysql -u root testdb < /var/test/data/workspace/${JENKINS_NAMESPACE}/${JENKINS_NAMESPACE}-${APP_NAME}-pipeline-volume/testdb.sql\" >> /home/jenkins/agent/workspace/${JENKINS_NAMESPACE}/${JENKINS_NAMESPACE}-${APP_NAME}-pipeline-volume/testdb-import.sh"
+        //sh "oc exec -n ${JENKINS_NAMESPACE} ${MYSQL_POD} -t -- mysql -u root < /var/test/data/workspace/${JENKINS_NAMESPACE}/${JENKINS_NAMESPACE}-${APP_NAME}-pipeline-volume/testdb.sql"
+        }
+
+     }
+    }
     
     stage('Run System Testing') {
      steps {
        echo "Starting System Testing"
        script {
          echo "Obtain ${APP_NAME} service"
-         def svc_name = "http://${APP_NAME}.${DEV_PROJECT}.svc:8080"
+         def svc_name = "http://${APP_NAME}.${JENKINS_NAMESPACE}.svc:8080"
         //def latestDeploymentVersion = openshift.selector('dc',"simple-python").object().status.latestVersion       
          echo "Test Application Status Code == 200"         
          status_code1 = sh (script: "curl -s -o /dev/null -w \"%{http_code}\" ${svc_name}",returnStdout: true)
@@ -125,7 +144,7 @@ agent {
        echo "Tagging Application Code For Stable Production"
        script {
          openshift.withCluster() {
-         openshift.tag( '${DEV_PROJECT}/${APP_NAME}:latest', '${PROD_PROJECT}/${APP_NAME}:latest')
+         openshift.tag( '${JENKINS_NAMESPACE}/${APP_NAME}:latest', '${PROD_PROJECT}/${APP_NAME}:latest')
          }
        echo "Application Promoted to Production"
        }
@@ -134,14 +153,14 @@ agent {
 
     stage('Remove all Deployments and Services in Testing Project') {
      steps {
-       echo "Removing Deployments and Services for project ${DEV_PROJECT}"
+       echo "Removing Deployments and Services for project ${JENKINS_NAMESPACE}"
        script {
          openshift.withCluster() {
-           openshift.raw("delete dc/mysql -n ${DEV_PROJECT}")
-           openshift.raw("delete svc/mysql -n ${DEV_PROJECT}")
-           openshift.raw("delete dc/${APP_NAME} -n ${DEV_PROJECT}")
-           openshift.raw("delete svc/${APP_NAME} -n ${DEV_PROJECT}")
-           openshift.raw("delete route/${APP_NAME} -n ${DEV_PROJECT}")
+           openshift.raw("delete dc/mysql -n ${JENKINS_NAMESPACE}")
+           openshift.raw("delete svc/mysql -n ${JENKINS_NAMESPACE}")
+           openshift.raw("delete dc/${APP_NAME} -n ${JENKINS_NAMESPACE}")
+           openshift.raw("delete svc/${APP_NAME} -n ${JENKINS_NAMESPACE}")
+           openshift.raw("delete route/${APP_NAME} -n ${JENKINS_NAMESPACE}")
          }
        echo "Application Promoted to Production"
        }
@@ -150,3 +169,6 @@ agent {
    
   }
 }
+
+
+
