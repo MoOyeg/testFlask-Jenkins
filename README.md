@@ -194,6 +194,8 @@ spec:
 oc create secret generic my-secret --from-literal=MYSQL_USER=$MYSQL_USER --from-literal=MYSQL_PASSWORD=$MYSQL_PASSWORD -n $JENKINS_NAMESPACE
 ```
 
+- You can create the pipeline object in Jenkins or or use a Buildconfig  
+
 ```bash
 echo """
 apiVersion: build.openshift.io/v1
