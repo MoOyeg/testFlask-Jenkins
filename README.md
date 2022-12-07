@@ -16,8 +16,19 @@ So this example assumes a pipeline scenario where there is a running production 
 - Create a Jenkins namespace  
   `oc new-project $JENKINS_NAMESPACE`
 
-- Create Jenkins  
-  `oc new-app jenkins-persistent --param ENABLE_OAUTH=true --param MEMORY_LIMIT=2Gi --param VOLUME_CAPACITY=4Gi --param DISABLE_ADMINISTRATIVE_MONITORS=true -n $JENKINS_NAMESPACE`
+- Create Jenkins either with storage or without
+  
+  With Storage  
+
+  ```bash
+  oc new-app jenkins-persistent --param ENABLE_OAUTH=true --param MEMORY_LIMIT=2Gi --param VOLUME_CAPACITY=4Gi --param DISABLE_ADMINISTRATIVE_MONITORS=true -n $JENKINS_NAMESPACE
+  ```
+
+  Without Storage
+  
+  ```bash
+  oc new-app jenkins-ephemeral --param ENABLE_OAUTH=true --param MEMORY_LIMIT=2Gi --param DISABLE_ADMINISTRATIVE_MONITORS=true -n $JENKINS_NAMESPACE
+  ```
 
 2 **Confirm you can login to Jenkins with the credentials you used to log into openshift**
 
