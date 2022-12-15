@@ -73,7 +73,7 @@ So this example assumes a pipeline scenario where there is a running production 
 
 - Label our Projects for the Development Console
 
-```
+```bash
    oc label dc/$APP_NAME app.kubernetes.io/part-of=$APP_NAME -n $NAMESPACE_PROD
    oc label dc/$MYSQL_HOST app.kubernetes.io/part-of=$APP_NAME -n $NAMESPACE_PROD
    oc annotate dc/$APP_NAME app.openshift.io/connects-to=$MYSQL_HOST -n $NAMESPACE_PROD
@@ -92,37 +92,15 @@ To build a jenkins image without a subscription please read https://github.com/o
 - Build Slave Image in Jenkins Project  
   `oc new-build --strategy=docker -D="$PYTHON_DOCKERFILE" --name=python-jenkins -n $JENKINS_NAMESPACE`
 
-- Expose Jenkins Service as a route  
+<!-- - Expose Jenkins Service as a route  
   `oc expose svc/jenkins -n $JENKINS_NAMESPACE`
 
 - You can Login to Jenkins WebPage to see how it is configures, get jenkins route by  
-  `oc get route jenkins -n $JENKINS_NAMESPACE -o jsonpath='{ .spec.host }' `
+  `oc get route jenkins -n $JENKINS_NAMESPACE -o jsonpath='{ .spec.host }' ` -->
 
 5 **Create Our BuildConfig with our buildstrategy as Pipeline**
 
 - We can create our BuildConfig below
-
-```bash
-  echo "apiVersion: v1
-items:
-- kind: "BuildConfig"
-  apiVersion: "v1"
-  metadata:
-    name: "$APP_NAME-pipeline"
-  spec:
-    source:
-      type: "Git"
-      git:
-        uri: https://github.com/MoOyeg/testFlask-Jenkins.git
-    strategy:
-      type: "JenkinsPipeline"
-      jenkinsPipelineStrategy:
-        jenkinsfilePath: Jenkinsfile
-kind: List
-metadata: []" | oc apply -f - -n $JENKINS_NAMESPACE
-```
-
-- On newer cluster versions use
 
 ```bash
 echo """
