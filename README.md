@@ -112,7 +112,7 @@ metadata:
 spec:
   source:
     git:
-      ref: master
+      ref: working
       uri: 'https://github.com/MoOyeg/testFlask-Jenkins.git'
     type: Git
   strategy:
@@ -139,7 +139,9 @@ spec:
 
 - We can start build using
 
-`oc start-build $APP_NAME-pipeline -n $JENKINS_NAMESPACE`
+  ```bash
+  oc start-build $APP_NAME-pipeline -n $JENKINS_NAMESPACE
+  ```
 
 - Log into Jenkins to follow the build, you can use the route provided earlier
 

@@ -132,6 +132,7 @@ agent {
       }     
     }
    
+    }
     post { 
       always {
        echo "Removing Deployments and Services for project ${DEV_PROJECT}"
@@ -147,5 +148,4 @@ agent {
        }
       }
     }
-  }
 }
