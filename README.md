@@ -44,13 +44,13 @@ So this example assumes a pipeline scenario where there is a running production 
   `oc new-project $NAMESPACE_PROD`
 
 - Add Permissions for Jenkins service account to Projects  
-  `oc adm policy add-cluster-role-to-user edit system:serviceaccount:$JENKINS_NAMESPACE:jenkins -n $NAMESPACE_DEV`  
-  `oc adm policy add-cluster-role-to-user edit system:serviceaccount:$JENKINS_NAMESPACE:jenkins -n $NAMESPACE_PROD`  
-  `oc adm policy add-cluster-role-to-user edit system:serviceaccount:$JENKINS_NAMESPACE:jenkins -n $JENKINS_NAMESPACE`
+  `oc policy add-role-to-user edit system:serviceaccount:$JENKINS_NAMESPACE:jenkins -n $NAMESPACE_DEV`  
+  `oc policy add-role-to-user edit system:serviceaccount:$JENKINS_NAMESPACE:jenkins -n $NAMESPACE_PROD`  
+  `oc policy add-role-to-user edit system:serviceaccount:$JENKINS_NAMESPACE:jenkins -n $JENKINS_NAMESPACE`
 
 - Add Permissions for Default service accountin jenkins namespace to Projects  
-  `oc adm policy add-cluster-role-to-user edit system:serviceaccount:$JENKINS_NAMESPACE:default -n $NAMESPACE_DEV`  
-  `oc adm policy add-cluster-role-to-user edit system:serviceaccount:$JENKINS_NAMESPACE:default -n $NAMESPACE_PROD`
+  `oc policy add-role-to-user edit system:serviceaccount:$JENKINS_NAMESPACE:default -n $NAMESPACE_DEV`  
+  `oc policy add-role-to-user edit system:serviceaccount:$JENKINS_NAMESPACE:default -n $NAMESPACE_PROD`
 
 - Create our Infrastructure Secret in our Development and Production  
   `oc create secret generic my-secret --from-literal=MYSQL_USER=$MYSQL_USER --from-literal=MYSQL_PASSWORD=$MYSQL_PASSWORD -n $NAMESPACE_DEV`  

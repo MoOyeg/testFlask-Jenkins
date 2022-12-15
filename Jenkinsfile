@@ -131,9 +131,9 @@ agent {
        }
       }     
     }
-
-    stage('Remove all Deployments and Services in Testing Project') {
-     steps {
+   
+    post { 
+      always {
        echo "Removing Deployments and Services for project ${DEV_PROJECT}"
        script {
          openshift.withCluster() {
@@ -145,8 +145,7 @@ agent {
          }
        echo "Application Promoted to Production"
        }
-      }     
+      }
     }
-   
   }
 }
