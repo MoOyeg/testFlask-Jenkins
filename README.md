@@ -155,13 +155,15 @@ spec:
 
 `oc set triggers bc/$APP_NAME-pipeline --from-github -n $JENKINS_NAMESPACE`
 
-## Use PodTemplates and Volumes as part of Pipeline
+## Use PodTemplates and Volumes for Pipeline
 
 ### Create PodTemplates
 
-- PodTemplatesprovide a way to define the Pod Instance to run that will run the build process.Example here requires the use of a Storage Class that supports dynamic provisioning.This Pipeline requires that you provide elevated privileged to the Jenkins serviceaccount to allow dynamic provisioning of the pvc.
+- PodTemplatesprovide a way to define the Pod Instance to run that will run the build process.Example here requires the use of a Storage Class that supports dynamic provisioning.  
+This pipeline shows an example of how to provision a dynamic volume and share it between the workspace and also use that volume in a pod.  
+This Pipeline requires that you provide elevated privileged to the Jenkins serviceaccount to allow dynamic provisioning of the pvc.
 
-- Export your StorageClass Values
+- Export your StorageClass Values, see example below:  
 
   ```bash
   export SC_NAME=sc-efs
@@ -179,13 +181,13 @@ spec:
   envsubst '$SC_NAME $PV_SIZE $ACCESS_MODE' < ./podtemplates/podtemplate-python-inherit-dynamic-volume.yaml | oc create -n $JENKINS_NAMESPACE -f -
   ```
 
-- Example builds application in JENKINS_NAMESPACE so we will add our secret
+- This example shares workspace volume with application builds, Since the PVC can only exist in one namespace we will build in JENKINS_NAMESPACE. Let's add our application secret
 
-```bash
-oc create secret generic my-secret --from-literal=MYSQL_USER=$MYSQL_USER --from-literal=MYSQL_PASSWORD=$MYSQL_PASSWORD -n $JENKINS_NAMESPACE
-```
+  ```bash
+  oc create secret generic my-secret --from-literal=MYSQL_USER=$MYSQL_USER --from-literal=MYSQL_PASSWORD=$MYSQL_PASSWORD -n $JENKINS_NAMESPACE
+  ```
 
-- You can create the pipeline object in Jenkins or or use a Buildconfig  
+- You can manuallycreate the pipeline object in Jenkins. Use the Jenkinsfile-with-volume(preferred) OR you can also use a Buildconfig.  
 
 ```bash
 echo """
