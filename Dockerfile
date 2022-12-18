@@ -11,4 +11,3 @@ RUN echo 'LC_ALL="en_US.UTF-8"' >> /etc/environment
 RUN echo 'LC_CTYPE="en_US.UTF-8"' >> /etc/environment
 RUN echo 'LANGUAGE="en_US.UTF-8"' >> /etc/environment
 USER 1001
-

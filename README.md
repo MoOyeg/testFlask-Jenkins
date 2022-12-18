@@ -44,13 +44,13 @@ So this example assumes a pipeline scenario where there is a running production 
   `oc new-project $NAMESPACE_PROD`
 
 - Add Permissions for Jenkins service account to Projects  
-  `oc adm policy add-cluster-role-to-user edit system:serviceaccount:$JENKINS_NAMESPACE:jenkins -n $NAMESPACE_DEV`  
-  `oc adm policy add-cluster-role-to-user edit system:serviceaccount:$JENKINS_NAMESPACE:jenkins -n $NAMESPACE_PROD`  
-  `oc adm policy add-cluster-role-to-user edit system:serviceaccount:$JENKINS_NAMESPACE:jenkins -n $JENKINS_NAMESPACE`
+  `oc policy add-role-to-user edit system:serviceaccount:$JENKINS_NAMESPACE:jenkins -n $NAMESPACE_DEV`  
+  `oc policy add-role-to-user edit system:serviceaccount:$JENKINS_NAMESPACE:jenkins -n $NAMESPACE_PROD`  
+  `oc policy add-role-to-user edit system:serviceaccount:$JENKINS_NAMESPACE:jenkins -n $JENKINS_NAMESPACE`
 
 - Add Permissions for Default service accountin jenkins namespace to Projects  
-  `oc adm policy add-cluster-role-to-user edit system:serviceaccount:$JENKINS_NAMESPACE:default -n $NAMESPACE_DEV`  
-  `oc adm policy add-cluster-role-to-user edit system:serviceaccount:$JENKINS_NAMESPACE:default -n $NAMESPACE_PROD`
+  `oc policy add-role-to-user edit system:serviceaccount:$JENKINS_NAMESPACE:default -n $NAMESPACE_DEV`  
+  `oc policy add-role-to-user edit system:serviceaccount:$JENKINS_NAMESPACE:default -n $NAMESPACE_PROD`
 
 - Create our Infrastructure Secret in our Development and Production  
   `oc create secret generic my-secret --from-literal=MYSQL_USER=$MYSQL_USER --from-literal=MYSQL_PASSWORD=$MYSQL_PASSWORD -n $NAMESPACE_DEV`  
@@ -73,7 +73,7 @@ So this example assumes a pipeline scenario where there is a running production 
 
 - Label our Projects for the Development Console
 
-```
+```bash
    oc label dc/$APP_NAME app.kubernetes.io/part-of=$APP_NAME -n $NAMESPACE_PROD
    oc label dc/$MYSQL_HOST app.kubernetes.io/part-of=$APP_NAME -n $NAMESPACE_PROD
    oc annotate dc/$APP_NAME app.openshift.io/connects-to=$MYSQL_HOST -n $NAMESPACE_PROD
@@ -92,37 +92,15 @@ To build a jenkins image without a subscription please read https://github.com/o
 - Build Slave Image in Jenkins Project  
   `oc new-build --strategy=docker -D="$PYTHON_DOCKERFILE" --name=python-jenkins -n $JENKINS_NAMESPACE`
 
-- Expose Jenkins Service as a route  
+<!-- - Expose Jenkins Service as a route  
   `oc expose svc/jenkins -n $JENKINS_NAMESPACE`
 
 - You can Login to Jenkins WebPage to see how it is configures, get jenkins route by  
-  `oc get route jenkins -n $JENKINS_NAMESPACE -o jsonpath='{ .spec.host }' `
+  `oc get route jenkins -n $JENKINS_NAMESPACE -o jsonpath='{ .spec.host }' ` -->
 
 5 **Create Our BuildConfig with our buildstrategy as Pipeline**
 
 - We can create our BuildConfig below
-
-```bash
-  echo "apiVersion: v1
-items:
-- kind: "BuildConfig"
-  apiVersion: "v1"
-  metadata:
-    name: "$APP_NAME-pipeline"
-  spec:
-    source:
-      type: "Git"
-      git:
-        uri: https://github.com/MoOyeg/testFlask-Jenkins.git
-    strategy:
-      type: "JenkinsPipeline"
-      jenkinsPipelineStrategy:
-        jenkinsfilePath: Jenkinsfile
-kind: List
-metadata: []" | oc apply -f - -n $JENKINS_NAMESPACE
-```
-
-- On newer cluster versions use
 
 ```bash
 echo """
@@ -134,7 +112,7 @@ metadata:
 spec:
   source:
     git:
-      ref: master
+      ref: working
       uri: 'https://github.com/MoOyeg/testFlask-Jenkins.git'
     type: Git
   strategy:
@@ -161,7 +139,9 @@ spec:
 
 - We can start build using
 
-`oc start-build $APP_NAME-pipeline -n $JENKINS_NAMESPACE`
+  ```bash
+  oc start-build $APP_NAME-pipeline -n $JENKINS_NAMESPACE
+  ```
 
 - Log into Jenkins to follow the build, you can use the route provided earlier
 
@@ -175,13 +155,16 @@ spec:
 
 `oc set triggers bc/$APP_NAME-pipeline --from-github -n $JENKINS_NAMESPACE`
 
-## Use PodTemplates and Volumes as part of Pipeline
+## Use PodTemplates and Volumes for Pipeline
 
 ### Create PodTemplates
 
-- PodTemplatesprovide a way to define the Pod Instance to run that will run the build process.Example here requires the use of a Storage Class that supports dynamic provisioning.This Pipeline requires that you provide elevated privileged to the Jenkins serviceaccount to allow dynamic provisioning of the pvc.
+- PodTemplatesprovide a way to define the Pod Instance to run that will run the build process.Example here requires the use of a Storage Class that supports dynamic provisioning.  
+This pipeline shows an example of how to provision a dynamic volume and share it between the workspace and also use that volume in a pod.  
+This Pipeline requires that you provide elevated privileged to the Jenkins serviceaccount to allow dynamic provisioning of the pvc.  
+For this Example RWX is required for storage class
 
-- Export your StorageClass Values
+- Export your StorageClass Values, see example below:  
 
   ```bash
   export SC_NAME=sc-efs
@@ -199,13 +182,19 @@ spec:
   envsubst '$SC_NAME $PV_SIZE $ACCESS_MODE' < ./podtemplates/podtemplate-python-inherit-dynamic-volume.yaml | oc create -n $JENKINS_NAMESPACE -f -
   ```
 
-- Example builds application in JENKINS_NAMESPACE so we will add our secret
+- This example shares workspace volume with application builds, Since the PVC can only exist in one namespace we will build in JENKINS_NAMESPACE. Let's add our application secret
 
-```bash
-oc create secret generic my-secret --from-literal=MYSQL_USER=$MYSQL_USER --from-literal=MYSQL_PASSWORD=$MYSQL_PASSWORD -n $JENKINS_NAMESPACE
-```
+  ```bash
+  oc create secret generic my-secret --from-literal=MYSQL_USER=$MYSQL_USER --from-literal=MYSQL_PASSWORD=$MYSQL_PASSWORD -n $JENKINS_NAMESPACE
+  ```
 
-- You can create the pipeline object in Jenkins or or use a Buildconfig  
+- Depending on how your cluster is configured you might need to apply RBAC permissions to allow Jenkins Agent use volumes.
+
+  ```bash
+   oc apply -k ./rbac
+  ```
+
+- You can manually create the pipeline object in Jenkins. Use the Jenkinsfile-with-volume(preferred) OR you can also use a Buildconfig.  
 
 ```bash
 echo """
