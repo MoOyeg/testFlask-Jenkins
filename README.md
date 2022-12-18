@@ -112,7 +112,7 @@ metadata:
 spec:
   source:
     git:
-      ref: working
+      ref: master
       uri: 'https://github.com/MoOyeg/testFlask-Jenkins.git'
     type: Git
   strategy:
@@ -206,7 +206,7 @@ metadata:
 spec:
   source:
     git:
-      ref: working
+      ref: master
       uri: 'https://github.com/MoOyeg/testFlask-Jenkins.git'
     type: Git
   strategy:
