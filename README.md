@@ -187,7 +187,13 @@ This Pipeline requires that you provide elevated privileged to the Jenkins servi
   oc create secret generic my-secret --from-literal=MYSQL_USER=$MYSQL_USER --from-literal=MYSQL_PASSWORD=$MYSQL_PASSWORD -n $JENKINS_NAMESPACE
   ```
 
-- You can manuallycreate the pipeline object in Jenkins. Use the Jenkinsfile-with-volume(preferred) OR you can also use a Buildconfig.  
+- Depending on how your cluster is configured you might need to apply RBAC permissions to allow Jenkins Agent use volumes.
+
+  ```bash
+   oc apply -k ./rbac
+  ```
+
+- You can manually create the pipeline object in Jenkins. Use the Jenkinsfile-with-volume(preferred) OR you can also use a Buildconfig.  
 
 ```bash
 echo """

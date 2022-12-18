@@ -1,0 +1,3 @@
+resources:
+- finalizer-role.yaml
+- finalizer-rolebinding.yaml
