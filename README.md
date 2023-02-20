@@ -5,6 +5,9 @@ Application will show how we can use Jenkins to deploy/test a flask application 
 Environment variables used in Commands have samples in the sample_env file.  
 So this example assumes a pipeline scenario where there is a running production application represented by our Production Project 'NAMESPACE_PROD' and at build time we deploy the same exact infrastructure in our devlopment project 'NAMESPACE_DEV' and test, when all satisfied we promote our dev image to production which is automatically deployed based on a trigger on the imagestream.
 
+## prerequisites
+- OCP Version <= 4.10
+
 ## Steps to Run
 
 **Steps 1 is only necessary if you don't have jenkins installed and want to install it in the cluster**  
