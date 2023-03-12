@@ -66,7 +66,7 @@ So this example assumes a pipeline scenario where there is a running production 
   `oc set env dc/$MYSQL_HOST --from=secret/my-secret -n $NAMESPACE_PROD`
 
 - Create our Production Application  
-  `oc new-app https://github.com/MoOyeg/testFlask.git --name=$APP_NAME -l app=testflask --strategy=source --env=APP_CONFIG=gunicorn.conf.py --env=APP_MODULE=testapp:app --env=MYSQL_HOST=$MYSQL_HOST --env=MYSQL_DATABASE=$MYSQL_DATABASE --as-deployment-config=true -n $NAMESPACE_PROD`
+  `oc new-app https://github.com/MoOyeg/testFlask.git --name=$APP_NAME -l app=testflask --strategy=source --env=APP_CONFIG=./gunicorn/gunicorn.conf.py --env=APP_MODULE=runapp:app --env=MYSQL_HOST=$MYSQL_HOST --env=MYSQL_DATABASE=$MYSQL_DATABASE --as-deployment-config=true -n $NAMESPACE_PROD`
 
 - Set our Secret on the Production Application  
   `oc set env dc/$APP_NAME --from=secret/my-secret -n $NAMESPACE_PROD`
