@@ -75,15 +75,18 @@ agent {
             "Couldn't create secret it might already exist: ${e}"
           }
 
-
           echo "Creating Mysql Application"
-          def fromJSON = openshift.create( readFile( 'mysql.json' ) )
-           
-           echo "Creating Mysql Service"
-           def fromJSON2 = openshift.create( readFile( 'mysql-svc.json' ) )
+          try {
+            def fromJSON = openshift.create( readFile( 'mysql.json' ) )
+          } catch ( e ) {
+            "Error test1: ${e}"
+          }
+          
+
+          echo "Creating Mysql Service"
+          def fromJSON2 = openshift.create( readFile( 'mysql-svc.json' ) )
 
            echo "Wait until deploy/mysql is available"
-           def deploymysql = openshift.selector('deploy', "mysql")
            def deploymysqlrcversion = openshift.selector('dc',"mysql").object().status.latestVersion
            def rc = openshift.selector('rc', "mysql-${deploymysqlrcversion}")
            rc.untilEach(1){
