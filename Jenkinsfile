@@ -76,23 +76,25 @@ agent {
           }
 
           echo "Creating Mysql Application"
-          try {
-            def fromJSON = openshift.create( readFile( 'mysql.json' ) )
-          } catch ( e ) {
-            "Error test1: ${e}"
-          }
-          
+          def fromJSON = openshift.create( readFile( 'mysql.json' ) )
+         
 
           echo "Creating Mysql Service"
           def fromJSON2 = openshift.create( readFile( 'mysql-svc.json' ) )
 
            echo "Wait until deploy/mysql is available"
-           def deploymysqlrcversion = openshift.selector('dc',"mysql").object().status.latestVersion
-           def rc = openshift.selector('rc', "mysql-${deploymysqlrcversion}")
-           rc.untilEach(1){
-              def rcMap = it.object()
-              return (rcMap.status.replicas.equals(rcMap.status.readyReplicas))
+           try {
+              def deploymysqlrcversion = openshift.selector('dc',"mysql").object().status.latestVersion
+              def rc = openshift.selector('rc', "mysql-${deploymysqlrcversion}")
+              rc.untilEach(1){
+                def rcMap = it.object()
+                return (rcMap.status.replicas.equals(rcMap.status.readyReplicas))
+              }
+           } catch ( e ) {
+             echo "error: ${e}"
            }
+
+
            echo "dc/mysql is available"
            
            echo "Creating Main Application"
