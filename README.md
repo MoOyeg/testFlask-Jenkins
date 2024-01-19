@@ -135,6 +135,7 @@ spec:
 
 - Set environment variables on BuildConfig
 
+<<<<<<< Updated upstream
 ```bash
   oc set env bc/$APP_NAME-pipeline \
 --env=JENKINS_NAMESPACE=$JENKINS_NAMESPACE \
@@ -143,6 +144,17 @@ spec:
 --env=APP_CONFIG=$APP_CONFIG --env=APP_MODULE=$APP_MODULE \
 --env=MYSQL_HOST=$MYSQL_HOST --env=MYSQL_DATABASE=$MYSQL_DATABASE --env=PROD_PROJECT=$NAMESPACE_PROD -n $JENKINS_NAMESPACE
 ```
+=======
+    ```bash
+      oc set env bc/$APP_NAME-pipeline \
+    --env=JENKINS_NAMESPACE=$JENKINS_NAMESPACE \
+    --env=REPO="https://github.com/MoOyeg/testFlask.git" \
+    --env=DEV_PROJECT=$NAMESPACE_DEV --env=APP_NAME=$APP_NAME \
+    --env=APP_CONFIG=$APP_CONFIG --env=APP_MODULE=$APP_MODULE \
+    --env=MYSQL_USER=$MYSQL_USER --env==MYSQL_PASSWORD=$MYSQL_PASSWORD \
+    --env=MYSQL_HOST=$MYSQL_HOST --env=MYSQL_DATABASE=$MYSQL_DATABASE --env=PROD_PROJECT=$NAMESPACE_PROD -n $JENKINS_NAMESPACE
+    ```
+>>>>>>> Stashed changes
 
 7 **Start build in Jenkins**
 

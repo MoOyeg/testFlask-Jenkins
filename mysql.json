@@ -1,10 +1,7 @@
 {
-    "apiVersion": "apps.openshift.io/v1",
-    "kind": "DeploymentConfig",
+    "apiVersion": "apps/v1",
+    "kind": "Deployment",
     "metadata": {
-        "annotations": {
-            "openshift.io/generated-by": "OpenShiftNewApp"
-        },
         "creationTimestamp": null,
         "generation": 1,
         "name": "mysql"
@@ -13,28 +10,20 @@
         "replicas": 1,
         "revisionHistoryLimit": 10,
         "selector": {
-            "deploymentconfig": "mysql"
+            "matchLabels": {
+                "deployment": "mysql"
+            }
         },
         "strategy": {
             "activeDeadlineSeconds": 21600,
             "resources": {},
-            "rollingParams": {
-                "intervalSeconds": 1,
-                "maxSurge": "25%",
-                "maxUnavailable": "25%",
-                "timeoutSeconds": 600,
-                "updatePeriodSeconds": 1
-            },
-            "type": "Rolling"
+            "type": "Recreate"
         },
         "template": {
             "metadata": {
-                "annotations": {
-                    "openshift.io/generated-by": "OpenShiftNewApp"
-                },
                 "creationTimestamp": null,
                 "labels": {
-                    "deploymentconfig": "mysql"
+                    "deployment": "mysql"
                 }
             },
             "spec": {
@@ -64,7 +53,7 @@
                                 }
                             }
                         ],
-                        "image": "image-registry.openshift-image-registry.svc:5000/openshift/mysql@sha256:f1b5e4e3e115032fe16c73bb5cf3dc59793be7d30c1da51395ec063c02f5cdd5",
+                        "image": "image-registry.openshift-image-registry.svc:5000/openshift/mysql:latest",
                         "imagePullPolicy": "IfNotPresent",
                         "name": "mysql",
                         "ports": [
@@ -85,26 +74,7 @@
                 "terminationGracePeriodSeconds": 30
             }
         },
-        "test": false,
-        "triggers": [
-            {
-                "type": "ConfigChange"
-            },
-            {
-                "imageChangeParams": {
-                    "automatic": true,
-                    "containerNames": [
-                        "mysql"
-                    ],
-                    "from": {
-                        "kind": "ImageStreamTag",
-                        "name": "mysql:8.0",
-                        "namespace": "openshift"
-                    }
-                },
-                "type": "ImageChange"
-            }
-        ]
+        "test": false
     },
     "status": {
         "availableReplicas": 0,
