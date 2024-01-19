@@ -59,6 +59,7 @@ agent {
            openshift.withProject( "${DEV_PROJECT}" ){
 
           try {
+            echo "Attempting to create secret in case it was not created"
             def mysql_secret = [
             "kind": "Secret",
             "metadata": [
@@ -74,8 +75,9 @@ agent {
             "Couldn't create secret it might already exist: ${e}"
           }
 
-           echo "Creating Mysql Application"
-           def fromJSON = openshift.create( readFile( 'mysql.json' ) )
+
+          echo "Creating Mysql Application"
+          def fromJSON = openshift.create( readFile( 'mysql.json' ) )
            
            echo "Creating Mysql Service"
            def fromJSON2 = openshift.create( readFile( 'mysql-svc.json' ) )
