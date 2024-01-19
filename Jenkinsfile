@@ -1,3 +1,5 @@
+// Documentation to help understand what is being done here
+// https://plugins.jenkins.io/openshift-client/#plugin-content-creating-objects-easier-than-you-were-expecting-hopefully
 pipeline {
 agent {
   kubernetes {
@@ -47,6 +49,7 @@ agent {
     //    }
     //   }     
     // }
+
     //You can run steps in different containers if you choose 
     // with the container('container_name') but according to the docs it defaults to non-jnlp container which works for this use-case
     stage('Create Test Version of Application') {
@@ -54,30 +57,55 @@ agent {
        script {
          openshift.withCluster() {
            openshift.withProject( "${DEV_PROJECT}" ){
-           echo "Creating Mysql Application"
-           def fromJSON = openshift.create( readFile( 'mysql.json' ) )
+
+          try {
+            echo "Attempting to create secret in case it was not created"
+            def mysql_secret = [
+            "kind": "Secret",
+            "metadata": [
+                "name": "my-secret",
+            ],
+            "stringData": [
+                "username": "${MYSQL_USER}",
+                "password": "${MYSQL_PASSWORD}"
+            ]
+           ]
+           def objs = openshift.create( mysql_secret, '--save-config', '--validate' )
+          } catch ( e ) {
+            "Couldn't create secret it might already exist: ${e}"
+          }
+
+
+          echo "Creating Mysql Application"
+          def fromJSON = openshift.create( readFile( 'mysql.json' ) )
            
            echo "Creating Mysql Service"
            def fromJSON2 = openshift.create( readFile( 'mysql-svc.json' ) )
 
-           echo "Wait until dc/mysql is available"
-           def dcmysql = openshift.selector('dc', "mysql")
-           dcmysql.rollout().status()
+           echo "Wait until deploy/mysql is available"
+           def deploymysql = openshift.selector('deploy', "mysql")
+           def deploymysqlrcversion = openshift.selector('dc',"mysql").object().status.latestVersion
+           def rc = openshift.selector('rc', "mysql-${deploymysqlrcversion}")
+           rc.untilEach(1){
+              def rcMap = it.object()
+              return (rcMap.status.replicas.equals(rcMap.status.readyReplicas))
+           }
            echo "dc/mysql is available"
            
            echo "Creating Main Application"
-           apply = openshift.apply(openshift.raw("new-app ${REPO} --name=${APP_NAME} -l app=${APP_NAME} --env=APP_CONFIG=${APP_CONFIG} --env=APP_MODULE=${APP_MODULE} --env=MYSQL_HOST=${MYSQL_HOST} --env=MYSQL_DATABASE=${MYSQL_DATABASE} --as-deployment-config=true --strategy=source --dry-run --output=yaml").actions[0].out)
+           //apply = openshift.apply(openshift.raw("new-app ${REPO} --name=${APP_NAME} -l app=${APP_NAME} --env=APP_CONFIG=${APP_CONFIG} --env=APP_MODULE=${APP_MODULE} --env=MYSQL_HOST=${MYSQL_HOST} --env=MYSQL_DATABASE=${MYSQL_DATABASE} --as-deployment-config=true --strategy=source --dry-run --output=yaml").actions[0].out)
+           apply = openshift.apply(openshift.raw("new-app ${REPO} --name=${APP_NAME} -l app=${APP_NAME} --env=APP_CONFIG=${APP_CONFIG} --env=APP_MODULE=${APP_MODULE} --env=MYSQL_HOST=${MYSQL_HOST} --env=MYSQL_DATABASE=${MYSQL_DATABASE} --strategy=source --dry-run --output=yaml").actions[0].out)
            //openshift.newApp('https://github.com/MoOyeg/testFlask.git')
            echo "Created Main Application"
              
            echo "Configure Main Application"
-           openshift.raw("set env dc/${APP_NAME} --from=secret/my-secret")
+           openshift.raw("set env deploy/${APP_NAME} --from=secret/my-secret")
            openshift.raw("expose svc/${APP_NAME}")
            openshift.raw("expose svc/mysql")
-           openshift.raw("label dc/mysql app=${APP_NAME}")
-           openshift.raw("label dc/${APP_NAME} app.kubernetes.io/part-of=${APP_NAME}")
+           openshift.raw("label deploy/mysql app=${APP_NAME}")
+           openshift.raw("label deploy/${APP_NAME} app.kubernetes.io/part-of=${APP_NAME}")
            openshift.raw("label dc/mysql app.kubernetes.io/part-of=${APP_NAME}")
-           openshift.raw("annotate dc/${APP_NAME} app.openshift.io/connects-to=mysql")
+           openshift.raw("annotate deploy/${APP_NAME} app.openshift.io/connects-to=mysql")
            echo "Configured Main Application"
 
            echo "Wait until dc/${APP_NAME} is available"

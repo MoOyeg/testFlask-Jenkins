@@ -158,6 +158,7 @@ So this example assumes a pipeline scenario where there is a running production 
     --env=JENKINS_NAMESPACE=$JENKINS_NAMESPACE \
     --env=REPO="https://github.com/MoOyeg/testFlask.git" \
     --env=DEV_PROJECT=$NAMESPACE_DEV --env=APP_NAME=$APP_NAME \
+    --env=MYSQL_USER=$MYSQL_USER --env=MYSQL_PASSWORD=$MYSQL_PASSWORD \
     --env=APP_CONFIG=$APP_CONFIG --env=APP_MODULE=$APP_MODULE \
     --env=MYSQL_HOST=$MYSQL_HOST --env=MYSQL_DATABASE=$MYSQL_DATABASE --env=PROD_PROJECT=$NAMESPACE_PROD -n $JENKINS_NAMESPACE
     ```
