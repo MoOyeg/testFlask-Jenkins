@@ -152,12 +152,12 @@ agent {
   post { 
     always {
       echo "Removing Deployments and Services for project ${DEV_PROJECT}"
-      sh "oc delete dc/mysql -n ${DEV_PROJECT} &> /dev/null || Did not delete dc/mysql or does not exist"
-      sh "oc delete svc/mysql -n ${DEV_PROJECT} &> /dev/null || Did not delete svc/mysql or does not exist"
-      sh "oc delete dc/${APP_NAME} -n ${DEV_PROJECT} &> /dev/null || Did not delete dc/${APP_NAME} or does not exist"
-      sh "oc delete svc/${APP_NAME} -n ${DEV_PROJECT} &> /dev/null || Did not delete svc/${APP_NAME} or does not exist"
-      sh "oc delete route/${APP_NAME} -n ${DEV_PROJECT} &> /dev/null || Did not delete route/${APP_NAME} or does not exist"
-      sh "oc delete route/mysql -n ${DEV_PROJECT} &> /dev/null || Did not delete route/mysql or does not exist"
+      sh "oc delete dc/mysql -n ${DEV_PROJECT} &> /dev/null || echo Did not delete dc/mysql or does not exist"
+      sh "oc delete svc/mysql -n ${DEV_PROJECT} &> /dev/null || echo Did not delete svc/mysql or does not exist"
+      sh "oc delete dc/${APP_NAME} -n ${DEV_PROJECT} &> /dev/null || echo Did not delete dc/${APP_NAME} or does not exist"
+      sh "oc delete svc/${APP_NAME} -n ${DEV_PROJECT} &> /dev/null || echo Did not delete svc/${APP_NAME} or does not exist"
+      sh "oc delete route/${APP_NAME} -n ${DEV_PROJECT} &> /dev/null || echo Did not delete route/${APP_NAME} or does not exist"
+      sh "oc delete route/mysql -n ${DEV_PROJECT} &> /dev/null || echo Did not delete route/mysql or does not exist"
       echo "Application Promoted to Production"
     }
   }

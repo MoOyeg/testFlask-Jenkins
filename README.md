@@ -10,52 +10,64 @@ So this example assumes a pipeline scenario where there is a running production 
 
 ## Steps to Run
 
-**Steps 1 is only necessary if you don't have jenkins installed and want to install it in the cluster**  
-0 **Source Sample Environment**  
-`eval "$(curl https://raw.githubusercontent.com/MoOyeg/testFlask/master/sample_env)"`
-
-1 **Create a new project and start a jenkins pod in openhshift,we will create a new project also for jenkins**
+- Source Environment Variables
+  ```bash
+  eval "$(curl https://raw.githubusercontent.com/MoOyeg/testFlask/master/sample_env)"
+  ```
 
 - Create a Jenkins namespace  
   `oc new-project $JENKINS_NAMESPACE`
 
 - Create Jenkins either with storage or without
   
-  With Storage  
+  - With Storage  
 
-  ```bash
-  oc new-app jenkins-persistent --param ENABLE_OAUTH=true --param MEMORY_LIMIT=2Gi --param VOLUME_CAPACITY=4Gi --param DISABLE_ADMINISTRATIVE_MONITORS=true -n $JENKINS_NAMESPACE
-  ```
+    ```bash
+    oc process -f ./jenkinsdeploytemplates/jenkins-persistent-deployment.yaml | oc apply -f - -n $JENKINS_NAMESPACE
+    ```
 
-  Without Storage
+  - Without Storage
 
-  ```bash
-  oc new-app jenkins-ephemeral --param ENABLE_OAUTH=true --param MEMORY_LIMIT=2Gi --param DISABLE_ADMINISTRATIVE_MONITORS=true -n $JENKINS_NAMESPACE
-  ```
+    ```bash
+    oc process -f ./jenkinsdeploytemplates/jenkins-ephemeral-deployment.yaml | oc apply -f - -n $JENKINS_NAMESPACE
+    ```
 
-2 **Confirm you can login to Jenkins with the credentials you used to log into openshift**
+- We used Openshift Oauth, so confirm you can login to Jenkins with the credentials you used to log into openshift
 
 - To get the route for the Jenkins login url  
-  `oc get route jenkins -n $JENKINS_NAMESPACE -o jsonpath='{ .spec.host }'`
+  ```bash
+  oc get route jenkins -n $JENKINS_NAMESPACE -o jsonpath='{ .spec.host }'
+  ```
 
 - Open the URL in a browser and login
 
-3 **Create prod and test projects for your pipeline and add permissions for the jenkins Service Account to be able to build on thos projects**
+- Create prod and test projects for your pipeline and add permissions for the jenkins Service Account to be able to build on thos projects
 
 - Create Projects  
-  `oc new-project $NAMESPACE_DEV`  
-  `oc new-project $NAMESPACE_PROD`
+  ```bash
+  oc new-project $NAMESPACE_DEV
+  ```  
+  ```bash
+  oc new-project $NAMESPACE_PROD
+  ```
 
 - Add Permissions for Jenkins service account to Projects  
-  `oc policy add-role-to-user edit system:serviceaccount:$JENKINS_NAMESPACE:jenkins -n $NAMESPACE_DEV`  
-  `oc policy add-role-to-user edit system:serviceaccount:$JENKINS_NAMESPACE:jenkins -n $NAMESPACE_PROD`  
-  `oc policy add-role-to-user edit system:serviceaccount:$JENKINS_NAMESPACE:jenkins -n $JENKINS_NAMESPACE`
+  ```bash
+  oc policy add-role-to-user edit system:serviceaccount:$JENKINS_NAMESPACE:jenkins -n $NAMESPACE_DEV 
 
-- Add Permissions for Default service accountin jenkins namespace to Projects  
-  `oc policy add-role-to-user edit system:serviceaccount:$JENKINS_NAMESPACE:default -n $NAMESPACE_DEV`  
-  `oc policy add-role-to-user edit system:serviceaccount:$JENKINS_NAMESPACE:default -n $NAMESPACE_PROD`
+  oc policy add-role-to-user edit system:serviceaccount:$JENKINS_NAMESPACE:jenkins -n $NAMESPACE_PROD
+  ```
 
-- Create our Infrastructure Secret in our Development and Production  
+- Add Permissions for Default service account in jenkins namespace to Projects  
+  ```bash
+  oc policy add-role-to-user edit system:serviceaccount:$JENKINS_NAMESPACE:default -n $NAMESPACE_DEV
+
+  oc policy add-role-to-user edit system:serviceaccount:$JENKINS_NAMESPACE:default -n $NAMESPACE_PROD
+  ```
+
+- [Run Installation Steps for Application](https://github.com/MoOyeg/testFlask#steps-to-build-and-run-application)
+ 
+<!-- - Create our Infrastructure Secret in our Development and Production  
   `oc create secret generic my-secret --from-literal=MYSQL_USER=$MYSQL_USER --from-literal=MYSQL_PASSWORD=$MYSQL_PASSWORD -n $NAMESPACE_DEV`  
   `oc create secret generic my-secret --from-literal=MYSQL_USER=$MYSQL_USER --from-literal=MYSQL_PASSWORD=$MYSQL_PASSWORD -n $NAMESPACE_PROD`
 
@@ -80,20 +92,31 @@ So this example assumes a pipeline scenario where there is a running production 
    oc label dc/$APP_NAME app.kubernetes.io/part-of=$APP_NAME -n $NAMESPACE_PROD
    oc label dc/$MYSQL_HOST app.kubernetes.io/part-of=$APP_NAME -n $NAMESPACE_PROD
    oc annotate dc/$APP_NAME app.openshift.io/connects-to=$MYSQL_HOST -n $NAMESPACE_PROD
-```
+``` -->
 
-4 **Create Jenkins Slave for Python**  
-The Jenkins slave will be used to run the jenkins pipeline, while not necessary to always create your own slave as
-Openshift comes out of the box with some, I am using this example to show you can build yours and if you have dependencies
-to test or build your application you can add them into your image.I am using the Dockerfile above to build my image, because the image uses an image in registry.redhat.io remember to create a service account, create a service account secret and link that secret to your builder service account in Jenkins, please see https://access.redhat.com/documentation/en-us/openshift_container_platform/3.11/html/configuring_clusters/install-config-configuring-red-hat-registry  
-Also you might not be able to build this image if your cluster is not entitled, please do this at cloud.redhat.com. If you have redhat subscriptions but have not entitled your cluster you can use this process to pass your entitlement into the BuildConfig, see https://docs.openshift.com/container-platform/4.4/builds/running-entitled-builds.html  
-To build a jenkins image without a subscription please read https://github.com/openshift/jenkins.
+- Create Jenkins Slave for Python  
+  The Jenkins slave will be used to run the jenkins pipeline, while not necessary to always create your own slave as
+  Openshift comes out of the box with some, I am using this example to show you can build yours and if you have dependencies
+  to test or build your application you can add them into your image.I am using the Dockerfile above to build my image, because the image uses an image in registry.redhat.io remember to create a service account, create a service account secret and link that secret to your builder service account in Jenkins, please see https://access.redhat.com/documentation/en-us/openshift_container_platform/3.11/html/configuring_clusters/install-config-configuring-red-hat-registry  
+  Also you might not be able to build this image if your cluster is not entitled, please do this at cloud.redhat.com. If you have redhat subscriptions but have not entitled your cluster you can use this process to pass your entitlement into the BuildConfig, see https://docs.openshift.com/container-platform/4.4/builds/running-entitled-builds.html  
+  To build a jenkins image without a subscription please read https://github.com/openshift/jenkins.
 
-- Pass DockerFile Value into Variable(Openshift Subscription Required)  
-  `export PYTHON_DOCKERFILE=$(curl https://raw.githubusercontent.com/MoOyeg/testFlask-Jenkins/master/Dockerfile)`
+  - Pass DockerFile Value into Variable(Openshift Subscription Required)
+    
+    If you have access to RedHat catalog
+    ```bash
+    export BASE_IMAGE=registry.redhat.io/openshift4/ose-jenkins-agent-base:v4.10.0
+    ``` 
 
-- Build Slave Image in Jenkins Project  
-  `oc new-build --strategy=docker -D="$PYTHON_DOCKERFILE" --name=python-jenkins -n $JENKINS_NAMESPACE`
+    If you do not have access you can try this option
+    ```bash
+    export BASE_IMAGE=image-registry.openshift-image-registry.svc:5000/openshift/jenkins-agent-base:latest
+    ``` 
+  
+    `export PYTHON_DOCKERFILE=$(curl https://raw.githubusercontent.com/MoOyeg/testFlask-Jenkins/master/Dockerfile)`
+
+  - Build Slave Image in Jenkins Project  
+    `oc new-build --strategy=docker -D="$PYTHON_DOCKERFILE" --name=python-jenkins -n $JENKINS_NAMESPACE`
 
 <!-- - Expose Jenkins Service as a route  
   `oc expose svc/jenkins -n $JENKINS_NAMESPACE`
@@ -101,50 +124,50 @@ To build a jenkins image without a subscription please read https://github.com/o
 - You can Login to Jenkins WebPage to see how it is configures, get jenkins route by  
   `oc get route jenkins -n $JENKINS_NAMESPACE -o jsonpath='{ .spec.host }' ` -->
 
-5 **Create Our BuildConfig with our buildstrategy as Pipeline**
+- Create Our BuildConfig with our buildstrategy as Pipeline
 
-- We can create our BuildConfig below
-
-```bash
-echo """
-apiVersion: build.openshift.io/v1
-kind: BuildConfig
-metadata:
-  name: "$APP_NAME-pipeline"
-  namespace: $JENKINS_NAMESPACE
-spec:
-  source:
-    git:
-      ref: master
-      uri: 'https://github.com/MoOyeg/testFlask-Jenkins.git'
-    type: Git
-  strategy:
-    type: "JenkinsPipeline"
-    jenkinsPipelineStrategy:
-      jenkinsfilePath: Jenkinsfile
-""" | oc create -f -
-```
-
-6 **Pass our variables to our pipeline, they will show up as parameters in jenkins**
-
-- Set environment variables on BuildConfig
-
-```bash
-  oc set env bc/$APP_NAME-pipeline \
---env=JENKINS_NAMESPACE=$JENKINS_NAMESPACE \
---env=REPO="https://github.com/MoOyeg/testFlask.git" \
---env=DEV_PROJECT=$NAMESPACE_DEV --env=APP_NAME=$APP_NAME \
---env=APP_CONFIG=$APP_CONFIG --env=APP_MODULE=$APP_MODULE \
---env=MYSQL_HOST=$MYSQL_HOST --env=MYSQL_DATABASE=$MYSQL_DATABASE --env=PROD_PROJECT=$NAMESPACE_PROD -n $JENKINS_NAMESPACE
-```
-
-7 **Start build in Jenkins**
-
-- We can start build using
+  - We can create our BuildConfig below
 
   ```bash
-  oc start-build $APP_NAME-pipeline -n $JENKINS_NAMESPACE
+  echo """
+  apiVersion: build.openshift.io/v1
+  kind: BuildConfig
+  metadata:
+    name: "$APP_NAME-pipeline"
+    namespace: $JENKINS_NAMESPACE
+  spec:
+    source:
+      git:
+        ref: master
+        uri: 'https://github.com/MoOyeg/testFlask-Jenkins.git'
+      type: Git
+    strategy:
+      type: "JenkinsPipeline"
+      jenkinsPipelineStrategy:
+        jenkinsfilePath: Jenkinsfile
+  """ | oc create -f -
   ```
+
+- Pass our variables to our pipeline, they will show up as parameters in jenkins**
+
+  - Set environment variables on BuildConfig
+
+    ```bash
+      oc set env bc/$APP_NAME-pipeline \
+    --env=JENKINS_NAMESPACE=$JENKINS_NAMESPACE \
+    --env=REPO="https://github.com/MoOyeg/testFlask.git" \
+    --env=DEV_PROJECT=$NAMESPACE_DEV --env=APP_NAME=$APP_NAME \
+    --env=APP_CONFIG=$APP_CONFIG --env=APP_MODULE=$APP_MODULE \
+    --env=MYSQL_HOST=$MYSQL_HOST --env=MYSQL_DATABASE=$MYSQL_DATABASE --env=PROD_PROJECT=$NAMESPACE_PROD -n $JENKINS_NAMESPACE
+    ```
+
+- Start build in Jenkins
+
+  - We can start build using
+
+    ```bash
+    oc start-build $APP_NAME-pipeline -n $JENKINS_NAMESPACE
+    ```
 
 - Log into Jenkins to follow the build, you can use the route provided earlier
 
@@ -152,11 +175,13 @@ spec:
 
 - We can confirm that prod version got updated with new application image
 
-8 **This pipeline can also be automically started with a code change via a webhook**
+- This pipeline can also be triggered with a a code change via a webhook
 
 - We can add a webhook by
 
-`oc set triggers bc/$APP_NAME-pipeline --from-github -n $JENKINS_NAMESPACE`
+  ```bash
+  oc set triggers bc/$APP_NAME-pipeline --from-github -n $JENKINS_NAMESPACE
+  ```
 
 ## Use PodTemplates and Volumes for Pipeline
 
@@ -199,31 +224,31 @@ For this Example RWX is required for storage class
 
 - You can manually create the pipeline object in Jenkins. Use the Jenkinsfile-with-volume(preferred) OR you can also use a Buildconfig.  
 
-```bash
-echo """
-apiVersion: build.openshift.io/v1
-kind: BuildConfig
-metadata:
-  name: "$APP_NAME-pipeline-volume"
-  namespace: $JENKINS_NAMESPACE
-spec:
-  source:
-    git:
-      ref: master
-      uri: 'https://github.com/MoOyeg/testFlask-Jenkins.git'
-    type: Git
-  strategy:
-    type: "JenkinsPipeline"
-    jenkinsPipelineStrategy:
-      jenkinsfilePath: Jenkinsfile-with-volume
-""" | oc create -f -
-```
+  ```bash
+  echo """
+  apiVersion: build.openshift.io/v1
+  kind: BuildConfig
+  metadata:
+    name: "$APP_NAME-pipeline-volume"
+    namespace: $JENKINS_NAMESPACE
+  spec:
+    source:
+      git:
+        ref: master
+        uri: 'https://github.com/MoOyeg/testFlask-Jenkins.git'
+      type: Git
+    strategy:
+      type: "JenkinsPipeline"
+      jenkinsPipelineStrategy:
+        jenkinsfilePath: Jenkinsfile-with-volume
+  """ | oc create -f -
+  ```
 
-```bash
-oc set env bc/$APP_NAME-pipeline-volume \
---env=JENKINS_NAMESPACE=$JENKINS_NAMESPACE \
---env=REPO="https://github.com/MoOyeg/testFlask.git" \
---env=DEV_PROJECT=$NAMESPACE_DEV --env=APP_NAME=$APP_NAME \
---env=APP_CONFIG=$APP_CONFIG --env=APP_MODULE=$APP_MODULE \
---env=MYSQL_HOST=$MYSQL_HOST --env=MYSQL_DATABASE=$MYSQL_DATABASE --env=PROD_PROJECT=$NAMESPACE_PROD -n $JENKINS_NAMESPACE
-```
+  ```bash
+  oc set env bc/$APP_NAME-pipeline-volume \
+  --env=JENKINS_NAMESPACE=$JENKINS_NAMESPACE \
+  --env=REPO="https://github.com/MoOyeg/testFlask.git" \
+  --env=DEV_PROJECT=$NAMESPACE_DEV --env=APP_NAME=$APP_NAME \
+  --env=APP_CONFIG=$APP_CONFIG --env=APP_MODULE=$APP_MODULE \
+  --env=MYSQL_HOST=$MYSQL_HOST --env=MYSQL_DATABASE=$MYSQL_DATABASE --env=PROD_PROJECT=$NAMESPACE_PROD -n $JENKINS_NAMESPACE
+  ```
