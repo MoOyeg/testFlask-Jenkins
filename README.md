@@ -65,7 +65,7 @@ So this example assumes a pipeline scenario where there is a running production 
   oc policy add-role-to-user edit system:serviceaccount:$JENKINS_NAMESPACE:default -n $NAMESPACE_PROD
   ```
 
-- [Run Installation Steps for Application](https://github.com/MoOyeg/testFlask#steps-to-build-and-run-application)
+- [Run Installation Steps for Application](https://github.com/MoOyeg/testFlask#steps-to-build-and-run-application) - You can skip this step, pipeline will still run but wont show how to replace promoted application.
  
 <!-- - Create our Infrastructure Secret in our Development and Production  
   `oc create secret generic my-secret --from-literal=MYSQL_USER=$MYSQL_USER --from-literal=MYSQL_PASSWORD=$MYSQL_PASSWORD -n $NAMESPACE_DEV`  
@@ -113,7 +113,7 @@ So this example assumes a pipeline scenario where there is a running production 
     export BASE_IMAGE=image-registry.openshift-image-registry.svc:5000/openshift/jenkins-agent-base:latest
     ``` 
   
-    `export PYTHON_DOCKERFILE=$(curl https://raw.githubusercontent.com/MoOyeg/testFlask-Jenkins/master/Dockerfile)`
+    `export PYTHON_DOCKERFILE=$(curl https://raw.githubusercontent.com/MoOyeg/testFlask-Jenkins/master/Dockerfile | envsubst )`
 
   - Build Slave Image in Jenkins Project  
     `oc new-build --strategy=docker -D="$PYTHON_DOCKERFILE" --name=python-jenkins -n $JENKINS_NAMESPACE`
