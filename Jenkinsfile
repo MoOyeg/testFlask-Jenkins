@@ -86,8 +86,8 @@ agent {
             }
             
             echo "Checking if mysql service exists"
-            def mysql-svc = openshift.selector( "service", "mysql")
-            def svcexists = mysql-svc.exists()
+            def mysql_svc = openshift.selector( "service", "mysql")
+            def svcexists = mysql_svc.exists()
             if ( svcexists ) {
               echo "Service mysql already exists"
             } else {
