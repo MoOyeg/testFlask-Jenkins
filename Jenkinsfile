@@ -76,22 +76,27 @@ agent {
           openshift.withCluster() {
             openshift.withProject( "${DEV_PROJECT}" ){
 
-            //try {
-            //echo "Attempting to create secret in case it was not created"
-            //openshift.raw("create secret generic my-secret --from-literal=MYSQL_USER=${MYSQL_USER} --from-literal=MYSQL_PASSWORD=${MYSQL_PASSWORD}")
-            //} catch ( e ) {
-            //  "Couldn't create secret it might already exist: ${e}"
-            //}
-
-            echo "Creating Mysql Application"
-            def fromJSON = openshift.create( readFile( 'mysql.json' ) )
-          
-            echo "Creating Mysql Service"
-            def fromJSON2 = openshift.create( readFile( 'mysql-svc.json' ) )
+            echo "Checking if mysql deployment exists"
+            def mysqldeploy = openshift.raw("get deploy mysql -o name")
+            if ( mysqldeploy.equals("deployment.apps/mysql") ) {
+              echo "Deployment mysql already exists"
+            } else {
+              echo "Deployment mysql does not exist, will create it"
+              def fromJSON = openshift.create( readFile( 'mysql.json' ) )
+            }
+            
+            echo "Checking if mysql service exists"
+            def mysql-svc = openshift.selector( "service", "mysql")
+            def svcexists = mysql-svc.exists()
+            if ( svcexists ) {
+              echo "Service mysql already exists"
+            } else {
+              echo "Service mysql does not exist, will create it"
+              def fromJSON2 = openshift.create( readFile( 'mysql-svc.json' ) )
+            }
 
             echo "Wait until deploy/mysql is available"
-            openshift.raw("rollout status deploy/mysql")  
-
+            openshift.raw("rollout status deploy/mysql --timeout=2m")  
             echo "deploy/mysql is available"
            
             echo "Creating Main Application"
