@@ -77,12 +77,16 @@ agent {
             openshift.withProject( "${DEV_PROJECT}" ){
 
             echo "Checking if mysql deployment exists"
-            def mysqldeploy = openshift.raw("get deploy mysql -o name")
-            if ( mysqldeploy.equals("deployment.apps/mysql") ) {
+            try {
+              def mysqldeploy = openshift.raw("get deploy mysql -o name")
               echo "Deployment mysql already exists"
-            } else {
-              echo "Deployment mysql does not exist, will create it"
-              def fromJSON = openshift.create( readFile( 'mysql.json' ) )
+            } catch ( e ) {
+              if ( e.toString().contains("NotFound") ) {
+                echo "Deployment mysql does not exist, will create it"
+                def fromJSON = openshift.create( readFile( 'mysql.json' ) )
+              } else {
+                throw e
+              }
             }
             
             echo "Checking if mysql service exists"
@@ -100,25 +104,31 @@ agent {
             echo "deploy/mysql is available"
            
             echo "Creating Main Application"
+            def appdeploy = openshift.raw("get deploy ${APP_NAME} -o name")
+            if ( appdeploy.equals("deployment.apps/${APP_NAME}") ) {
+              echo "Deployment ${APP_NAME} already exists"
+            } else {
+              echo "Deployment ${APP_NAME} does not exist, will create it"
+              apply = openshift.apply(openshift.raw("new-app ${REPO} --name=${APP_NAME} -l app=${APP_NAME} --env=APP_CONFIG=${APP_CONFIG} --env=APP_MODULE=${APP_MODULE} --env=MYSQL_HOST=${MYSQL_HOST} --env=MYSQL_DATABASE=${MYSQL_DATABASE} --strategy=source --dry-run --output=yaml").actions[0].out)
+            }
+
             //apply = openshift.apply(openshift.raw("new-app ${REPO} --name=${APP_NAME} -l app=${APP_NAME} --env=APP_CONFIG=${APP_CONFIG} --env=APP_MODULE=${APP_MODULE} --env=MYSQL_HOST=${MYSQL_HOST} --env=MYSQL_DATABASE=${MYSQL_DATABASE} --as-deployment-config=true --strategy=source --dry-run --output=yaml").actions[0].out)
-            apply = openshift.apply(openshift.raw("new-app ${REPO} --name=${APP_NAME} -l app=${APP_NAME} --env=APP_CONFIG=${APP_CONFIG} --env=APP_MODULE=${APP_MODULE} --env=MYSQL_HOST=${MYSQL_HOST} --env=MYSQL_DATABASE=${MYSQL_DATABASE} --strategy=source --dry-run --output=yaml").actions[0].out)
+            //apply = openshift.apply(openshift.raw("new-app ${REPO} --name=${APP_NAME} -l app=${APP_NAME} --env=APP_CONFIG=${APP_CONFIG} --env=APP_MODULE=${APP_MODULE} --env=MYSQL_HOST=${MYSQL_HOST} --env=MYSQL_DATABASE=${MYSQL_DATABASE} --strategy=source --dry-run --output=yaml").actions[0].out)
             //openshift.newApp('https://github.com/MoOyeg/testFlask.git')
-            echo "Created Main Application"
-             
+                        
             echo "Configure Main Application"
             openshift.raw("set env deploy/${APP_NAME} --from=secret/my-secret")
             openshift.raw("expose svc/${APP_NAME}")
             openshift.raw("expose svc/mysql")
             openshift.raw("label deploy/mysql app=${APP_NAME}")
             openshift.raw("label deploy/${APP_NAME} app.kubernetes.io/part-of=${APP_NAME}")
-            openshift.raw("label dc/mysql app.kubernetes.io/part-of=${APP_NAME}")
+            openshift.raw("label deploy/mysql app.kubernetes.io/part-of=${APP_NAME}")
             openshift.raw("annotate deploy/${APP_NAME} app.openshift.io/connects-to=mysql")
             echo "Configured Main Application"
 
-            echo "Wait until dc/${APP_NAME} is available"
-            def dcmainapp = openshift.selector('dc', "${APP_NAME}")
-            dcmainapp.rollout().status()
-            echo "dc/${APP_NAME} is available"
+            echo "Wait until deploy/${APP_NAME} is available"
+            openshift.raw("rollout status deploy/${APP_NAME} --timeout=2m")  
+            echo "deploy/${APP_NAME} is available"
 
             }
           }
