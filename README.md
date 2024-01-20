@@ -189,7 +189,7 @@ So this example assumes a pipeline scenario where there is a running production 
 ### Create PodTemplates
 
 - PodTemplatesprovide a way to define the Pod Instance to run that will run the build process.Example here requires the use of a Storage Class that supports dynamic provisioning.  
-This pipeline shows an example of how to provision a dynamic volume and share it between the workspace and also use that volume in a pod.  
+This pipeline shows an example of how to provision a dynamic volume and share it between the workspace and a pod within the pipline steps. 
 This Pipeline requires that you provide elevated privileged to the Jenkins serviceaccount to allow dynamic provisioning of the pvc.  
 For this Example RWX is required for storage class
 
