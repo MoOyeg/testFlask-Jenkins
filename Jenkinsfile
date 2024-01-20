@@ -78,24 +78,13 @@ agent {
           echo "Creating Mysql Application"
           def fromJSON = openshift.create( readFile( 'mysql.json' ) )
          
-
           echo "Creating Mysql Service"
           def fromJSON2 = openshift.create( readFile( 'mysql-svc.json' ) )
 
-           echo "Wait until deploy/mysql is available"
-           try {
-              def deploymysqlrcversion = openshift.selector('dc',"mysql").object().status.latestVersion
-              def rc = openshift.selector('rc', "mysql-${deploymysqlrcversion}")
-              rc.untilEach(1){
-                def rcMap = it.object()
-                return (rcMap.status.replicas.equals(rcMap.status.readyReplicas))
-              }
-           } catch ( e ) {
-             echo "error: ${e}"
-           }
+          echo "Wait until deploy/mysql is available"
+          openshift.raw("rollout status deploy/mysql")")   
 
-
-           echo "dc/mysql is available"
+          echo "deploy/mysql is available"
            
            echo "Creating Main Application"
            //apply = openshift.apply(openshift.raw("new-app ${REPO} --name=${APP_NAME} -l app=${APP_NAME} --env=APP_CONFIG=${APP_CONFIG} --env=APP_MODULE=${APP_MODULE} --env=MYSQL_HOST=${MYSQL_HOST} --env=MYSQL_DATABASE=${MYSQL_DATABASE} --as-deployment-config=true --strategy=source --dry-run --output=yaml").actions[0].out)
