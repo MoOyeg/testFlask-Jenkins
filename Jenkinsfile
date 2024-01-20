@@ -59,18 +59,8 @@ agent {
            openshift.withProject( "${DEV_PROJECT}" ){
 
           try {
-            echo "Attempting to create secret in case it was not created"
-            def mysql_secret = [
-            "kind": "Secret",
-            "metadata": [
-                "name": "my-secret",
-            ],
-            "stringData": [
-                "username": "${MYSQL_USER}",
-                "password": "${MYSQL_PASSWORD}"
-            ]
-           ]
-           def objs = openshift.create( mysql_secret )
+          echo "Attempting to create secret in case it was not created"
+          openshift.raw("create secret generic my-secret --from-literal=MYSQL_USER=${MYSQL_USER} --from-literal=MYSQL_PASSWORD=${MYSQL_PASSWORD} -n ${NAMESPACE_DEV}")
           } catch ( e ) {
             "Couldn't create secret it might already exist: ${e}"
           }
