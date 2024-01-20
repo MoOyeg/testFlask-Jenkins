@@ -1,3 +1,5 @@
+// Documentation to help understand what is being done here
+// https://plugins.jenkins.io/openshift-client/#plugin-content-creating-objects-easier-than-you-were-expecting-hopefully
 pipeline {
 agent {
   kubernetes {
@@ -16,24 +18,24 @@ agent {
 }
 
   stages {
-
     stage('Checkout Pipeline Source') {
-     steps {
-       echo "Checking out Code}"
-       checkout scm
+      steps {
+        echo "Checking out Code}"
+        checkout scm
       }     
     }
 
 
     stage('Clone Application Source') {
-     steps {
-       echo "Clone our Application Source Code}"
-       script {             
-             sh "git clone ${REPO}"
-          }
+      steps {
+        echo "Clone our Application Source Code}"
+        script {             
+          sh "git clone ${REPO}"
+        }
       }     
     }
-    // Commenting out Unit Test Due to Python Version
+
+    // Commenting out Unit Test Due to Python Version Error
     // stage('Run Unit Testing') {
     //  steps {
     //    echo "Starting Unit Testing"
@@ -47,47 +49,94 @@ agent {
     //    }
     //   }     
     // }
+
+
+    stage ('Create MySQL Secret in case its not present') {
+      steps {
+        script {
+          openshift.withCluster() {
+            openshift.withProject( "${DEV_PROJECT}" ){
+              try {
+                echo "Attempting to create secret in case it was not created"
+                openshift.raw("create secret generic my-secret --from-literal=MYSQL_USER=${MYSQL_USER} --from-literal=MYSQL_PASSWORD=${MYSQL_PASSWORD}")
+              } catch ( e ) {
+                "Couldn't create secret it might already exist: ${e}"
+              }
+            }
+          }
+        }
+      }
+    }
+
     //You can run steps in different containers if you choose 
     // with the container('container_name') but according to the docs it defaults to non-jnlp container which works for this use-case
     stage('Create Test Version of Application') {
-     steps {
-       script {
-         openshift.withCluster() {
-           openshift.withProject( "${DEV_PROJECT}" ){
-           echo "Creating Mysql Application"
-           def fromJSON = openshift.create( readFile( 'mysql.json' ) )
+      steps {
+        script {
+          openshift.withCluster() {
+            openshift.withProject( "${DEV_PROJECT}" ){
+
+            echo "Checking if mysql deployment exists"
+            try {
+              def mysqldeploy = openshift.raw("get deploy mysql -o name")
+              echo "Deployment mysql already exists"
+            } catch ( e ) {
+              if ( e.toString().contains("NotFound") ) {
+                echo "Deployment mysql does not exist, will create it"
+                def fromJSON = openshift.create( readFile( 'mysql.json' ) )
+              } else {
+                throw e
+              }
+            }
+            
+            echo "Checking if mysql service exists"
+            def mysql_svc = openshift.selector( "service", "mysql")
+            def svcexists = mysql_svc.exists()
+            if ( svcexists ) {
+              echo "Service mysql already exists"
+            } else {
+              echo "Service mysql does not exist, will create it"
+              def fromJSON2 = openshift.create( readFile( 'mysql-svc.json' ) )
+            }
+
+            echo "Wait until deploy/mysql is available"
+            openshift.raw("rollout status deploy/mysql --timeout=2m")  
+            echo "deploy/mysql is available"
            
-           echo "Creating Mysql Service"
-           def fromJSON2 = openshift.create( readFile( 'mysql-svc.json' ) )
+            echo "Checking if deployment  ${APP_NAME} exists"
+            try {
+              def appdeploy = openshift.raw("get deploy ${APP_NAME} -o name")
+              echo "Deployment ${APP_NAME} already exists"
+            } catch ( e ) {
+              if ( e.toString().contains("NotFound") ) {
+                echo "Deployment ${APP_NAME} does not exist, will create it"
+                apply = openshift.apply(openshift.raw("new-app ${REPO} --name=${APP_NAME} -l app=${APP_NAME} --env=APP_CONFIG=${APP_CONFIG} --env=APP_MODULE=${APP_MODULE} --env=MYSQL_HOST=${MYSQL_HOST} --env=MYSQL_DATABASE=${MYSQL_DATABASE} --strategy=source --dry-run --output=yaml").actions[0].out)
+              } else {
+                throw e
+              }
+            }
 
-           echo "Wait until dc/mysql is available"
-           def dcmysql = openshift.selector('dc', "mysql")
-           dcmysql.rollout().status()
-           echo "dc/mysql is available"
-           
-           echo "Creating Main Application"
-           apply = openshift.apply(openshift.raw("new-app ${REPO} --name=${APP_NAME} -l app=${APP_NAME} --env=APP_CONFIG=${APP_CONFIG} --env=APP_MODULE=${APP_MODULE} --env=MYSQL_HOST=${MYSQL_HOST} --env=MYSQL_DATABASE=${MYSQL_DATABASE} --as-deployment-config=true --strategy=source --dry-run --output=yaml").actions[0].out)
-           //openshift.newApp('https://github.com/MoOyeg/testFlask.git')
-           echo "Created Main Application"
-             
-           echo "Configure Main Application"
-           openshift.raw("set env dc/${APP_NAME} --from=secret/my-secret")
-           openshift.raw("expose svc/${APP_NAME}")
-           openshift.raw("expose svc/mysql")
-           openshift.raw("label dc/mysql app=${APP_NAME}")
-           openshift.raw("label dc/${APP_NAME} app.kubernetes.io/part-of=${APP_NAME}")
-           openshift.raw("label dc/mysql app.kubernetes.io/part-of=${APP_NAME}")
-           openshift.raw("annotate dc/${APP_NAME} app.openshift.io/connects-to=mysql")
-           echo "Configured Main Application"
+            //apply = openshift.apply(openshift.raw("new-app ${REPO} --name=${APP_NAME} -l app=${APP_NAME} --env=APP_CONFIG=${APP_CONFIG} --env=APP_MODULE=${APP_MODULE} --env=MYSQL_HOST=${MYSQL_HOST} --env=MYSQL_DATABASE=${MYSQL_DATABASE} --as-deployment-config=true --strategy=source --dry-run --output=yaml").actions[0].out)
+            //apply = openshift.apply(openshift.raw("new-app ${REPO} --name=${APP_NAME} -l app=${APP_NAME} --env=APP_CONFIG=${APP_CONFIG} --env=APP_MODULE=${APP_MODULE} --env=MYSQL_HOST=${MYSQL_HOST} --env=MYSQL_DATABASE=${MYSQL_DATABASE} --strategy=source --dry-run --output=yaml").actions[0].out)
+            //openshift.newApp('https://github.com/MoOyeg/testFlask.git')
+                        
+            echo "Configure Main Application"
+            openshift.raw("set env deploy/${APP_NAME} --from=secret/my-secret")
+            openshift.raw("expose svc/${APP_NAME}")
+            openshift.raw("expose svc/mysql")
+            openshift.raw("label deploy/mysql app=${APP_NAME}")
+            openshift.raw("label deploy/${APP_NAME} app.kubernetes.io/part-of=${APP_NAME}")
+            openshift.raw("label deploy/mysql app.kubernetes.io/part-of=${APP_NAME}")
+            openshift.raw("annotate deploy/${APP_NAME} app.openshift.io/connects-to=mysql")
+            echo "Configured Main Application"
 
-           echo "Wait until dc/${APP_NAME} is available"
-           def dcmainapp = openshift.selector('dc', "${APP_NAME}")
-           dcmainapp.rollout().status()
-           echo "dc/${APP_NAME} is available"
+            echo "Wait until deploy/${APP_NAME} is available"
+            openshift.raw("rollout status deploy/${APP_NAME} --timeout=2m")  
+            echo "deploy/${APP_NAME} is available"
 
+            }
           }
-         }
-       }
+        }
 
       }     
     }
@@ -99,7 +148,7 @@ agent {
          echo "Obtain ${APP_NAME} service"
          def svc_name = "http://${APP_NAME}.${DEV_PROJECT}.svc:8080"
         //def latestDeploymentVersion = openshift.selector('dc',"simple-python").object().status.latestVersion       
-         echo "Test Application Status Code == 200"         
+         echo "Test Application Status Code == 200"       
          status_code1 = sh (script: "curl -s -o /dev/null -w \"%{http_code}\" ${svc_name}",returnStdout: true)
          echo "${status_code1}"
          if ( "${status_code1}" == "200" ){
@@ -151,14 +200,13 @@ agent {
 
   post { 
     always {
-      echo "Removing Deployments and Services for project ${DEV_PROJECT}"
-      sh "oc delete dc/mysql -n ${DEV_PROJECT} &> /dev/null || echo Did not delete dc/mysql or does not exist"
+      echo "Removing Test Deployments and Services for project ${DEV_PROJECT}"
+      sh "oc delete deploy/mysql -n ${DEV_PROJECT} &> /dev/null || echo Did not delete dc/mysql or does not exist"
       sh "oc delete svc/mysql -n ${DEV_PROJECT} &> /dev/null || echo Did not delete svc/mysql or does not exist"
-      sh "oc delete dc/${APP_NAME} -n ${DEV_PROJECT} &> /dev/null || echo Did not delete dc/${APP_NAME} or does not exist"
+      sh "oc delete deploy/${APP_NAME} -n ${DEV_PROJECT} &> /dev/null || echo Did not delete dc/${APP_NAME} or does not exist"
       sh "oc delete svc/${APP_NAME} -n ${DEV_PROJECT} &> /dev/null || echo Did not delete svc/${APP_NAME} or does not exist"
       sh "oc delete route/${APP_NAME} -n ${DEV_PROJECT} &> /dev/null || echo Did not delete route/${APP_NAME} or does not exist"
       sh "oc delete route/mysql -n ${DEV_PROJECT} &> /dev/null || echo Did not delete route/mysql or does not exist"
-      echo "Application Promoted to Production"
     }
   }
 }
