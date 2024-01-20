@@ -70,7 +70,7 @@ agent {
                 "password": "${MYSQL_PASSWORD}"
             ]
            ]
-           def objs = openshift.create( mysql_secret, '--save-config', '--validate' )
+           def objs = openshift.create( mysql_secret )
           } catch ( e ) {
             "Couldn't create secret it might already exist: ${e}"
           }
