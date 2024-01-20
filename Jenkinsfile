@@ -82,7 +82,7 @@ agent {
           def fromJSON2 = openshift.create( readFile( 'mysql-svc.json' ) )
 
           echo "Wait until deploy/mysql is available"
-          openshift.raw("rollout status deploy/mysql")")   
+          openshift.raw("rollout status deploy/mysql")  
 
           echo "deploy/mysql is available"
            
