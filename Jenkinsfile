@@ -148,7 +148,7 @@ agent {
          echo "Obtain ${APP_NAME} service"
          def svc_name = "http://${APP_NAME}.${DEV_PROJECT}.svc:8080"
         //def latestDeploymentVersion = openshift.selector('dc',"simple-python").object().status.latestVersion       
-         echo "Test Application Status Code == 200"         
+         echo "Test Application Status Code == 200"       
          status_code1 = sh (script: "curl -s -o /dev/null -w \"%{http_code}\" ${svc_name}",returnStdout: true)
          echo "${status_code1}"
          if ( "${status_code1}" == "200" ){
