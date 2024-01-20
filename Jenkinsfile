@@ -18,24 +18,24 @@ agent {
 }
 
   stages {
-
     stage('Checkout Pipeline Source') {
-     steps {
-       echo "Checking out Code}"
-       checkout scm
+      steps {
+        echo "Checking out Code}"
+        checkout scm
       }     
     }
 
 
     stage('Clone Application Source') {
-     steps {
-       echo "Clone our Application Source Code}"
-       script {             
-             sh "git clone ${REPO}"
-          }
+      steps {
+        echo "Clone our Application Source Code}"
+        script {             
+          sh "git clone ${REPO}"
+        }
       }     
     }
-    // Commenting out Unit Test Due to Python Version
+
+    // Commenting out Unit Test Due to Python Version Error
     // stage('Run Unit Testing') {
     //  steps {
     //    echo "Starting Unit Testing"
@@ -53,53 +53,53 @@ agent {
     //You can run steps in different containers if you choose 
     // with the container('container_name') but according to the docs it defaults to non-jnlp container which works for this use-case
     stage('Create Test Version of Application') {
-     steps {
-       script {
-         openshift.withCluster() {
-           openshift.withProject( "${DEV_PROJECT}" ){
+      steps {
+        script {
+          openshift.withCluster() {
+            openshift.withProject( "${DEV_PROJECT}" ){
 
-          try {
-          echo "Attempting to create secret in case it was not created"
-          openshift.raw("create secret generic my-secret --from-literal=MYSQL_USER=${MYSQL_USER} --from-literal=MYSQL_PASSWORD=${MYSQL_PASSWORD} -n ${NAMESPACE_DEV}")
-          } catch ( e ) {
-            "Couldn't create secret it might already exist: ${e}"
-          }
+            //try {
+            echo "Attempting to create secret in case it was not created"
+            openshift.raw("create secret generic my-secret --from-literal=MYSQL_USER=${MYSQL_USER} --from-literal=MYSQL_PASSWORD=${MYSQL_PASSWORD} -n ${NAMESPACE_DEV}")
+            //} catch ( e ) {
+            //  "Couldn't create secret it might already exist: ${e}"
+            //}
 
-          echo "Creating Mysql Application"
-          def fromJSON = openshift.create( readFile( 'mysql.json' ) )
-         
-          echo "Creating Mysql Service"
-          def fromJSON2 = openshift.create( readFile( 'mysql-svc.json' ) )
+            echo "Creating Mysql Application"
+            def fromJSON = openshift.create( readFile( 'mysql.json' ) )
+          
+            echo "Creating Mysql Service"
+            def fromJSON2 = openshift.create( readFile( 'mysql-svc.json' ) )
 
-          echo "Wait until deploy/mysql is available"
-          openshift.raw("rollout status deploy/mysql")  
+            echo "Wait until deploy/mysql is available"
+            openshift.raw("rollout status deploy/mysql")  
 
-          echo "deploy/mysql is available"
+            echo "deploy/mysql is available"
            
-           echo "Creating Main Application"
-           //apply = openshift.apply(openshift.raw("new-app ${REPO} --name=${APP_NAME} -l app=${APP_NAME} --env=APP_CONFIG=${APP_CONFIG} --env=APP_MODULE=${APP_MODULE} --env=MYSQL_HOST=${MYSQL_HOST} --env=MYSQL_DATABASE=${MYSQL_DATABASE} --as-deployment-config=true --strategy=source --dry-run --output=yaml").actions[0].out)
-           apply = openshift.apply(openshift.raw("new-app ${REPO} --name=${APP_NAME} -l app=${APP_NAME} --env=APP_CONFIG=${APP_CONFIG} --env=APP_MODULE=${APP_MODULE} --env=MYSQL_HOST=${MYSQL_HOST} --env=MYSQL_DATABASE=${MYSQL_DATABASE} --strategy=source --dry-run --output=yaml").actions[0].out)
-           //openshift.newApp('https://github.com/MoOyeg/testFlask.git')
-           echo "Created Main Application"
+            echo "Creating Main Application"
+            //apply = openshift.apply(openshift.raw("new-app ${REPO} --name=${APP_NAME} -l app=${APP_NAME} --env=APP_CONFIG=${APP_CONFIG} --env=APP_MODULE=${APP_MODULE} --env=MYSQL_HOST=${MYSQL_HOST} --env=MYSQL_DATABASE=${MYSQL_DATABASE} --as-deployment-config=true --strategy=source --dry-run --output=yaml").actions[0].out)
+            apply = openshift.apply(openshift.raw("new-app ${REPO} --name=${APP_NAME} -l app=${APP_NAME} --env=APP_CONFIG=${APP_CONFIG} --env=APP_MODULE=${APP_MODULE} --env=MYSQL_HOST=${MYSQL_HOST} --env=MYSQL_DATABASE=${MYSQL_DATABASE} --strategy=source --dry-run --output=yaml").actions[0].out)
+            //openshift.newApp('https://github.com/MoOyeg/testFlask.git')
+            echo "Created Main Application"
              
-           echo "Configure Main Application"
-           openshift.raw("set env deploy/${APP_NAME} --from=secret/my-secret")
-           openshift.raw("expose svc/${APP_NAME}")
-           openshift.raw("expose svc/mysql")
-           openshift.raw("label deploy/mysql app=${APP_NAME}")
-           openshift.raw("label deploy/${APP_NAME} app.kubernetes.io/part-of=${APP_NAME}")
-           openshift.raw("label dc/mysql app.kubernetes.io/part-of=${APP_NAME}")
-           openshift.raw("annotate deploy/${APP_NAME} app.openshift.io/connects-to=mysql")
-           echo "Configured Main Application"
+            echo "Configure Main Application"
+            openshift.raw("set env deploy/${APP_NAME} --from=secret/my-secret")
+            openshift.raw("expose svc/${APP_NAME}")
+            openshift.raw("expose svc/mysql")
+            openshift.raw("label deploy/mysql app=${APP_NAME}")
+            openshift.raw("label deploy/${APP_NAME} app.kubernetes.io/part-of=${APP_NAME}")
+            openshift.raw("label dc/mysql app.kubernetes.io/part-of=${APP_NAME}")
+            openshift.raw("annotate deploy/${APP_NAME} app.openshift.io/connects-to=mysql")
+            echo "Configured Main Application"
 
-           echo "Wait until dc/${APP_NAME} is available"
-           def dcmainapp = openshift.selector('dc', "${APP_NAME}")
-           dcmainapp.rollout().status()
-           echo "dc/${APP_NAME} is available"
+            echo "Wait until dc/${APP_NAME} is available"
+            def dcmainapp = openshift.selector('dc', "${APP_NAME}")
+            dcmainapp.rollout().status()
+            echo "dc/${APP_NAME} is available"
 
+            }
           }
-         }
-       }
+        }
 
       }     
     }
