@@ -50,6 +50,24 @@ agent {
     //   }     
     // }
 
+
+    stage ('Create MySQL Secret in case its not present') {
+      steps {
+        script {
+          openshift.withCluster() {
+            openshift.withProject( "${DEV_PROJECT}" ){
+              try {
+                echo "Attempting to create secret in case it was not created"
+                openshift.raw("create secret generic my-secret --from-literal=MYSQL_USER=${MYSQL_USER} --from-literal=MYSQL_PASSWORD=${MYSQL_PASSWORD}")
+              } catch ( e ) {
+                "Couldn't create secret it might already exist: ${e}"
+              }
+            }
+          }
+        }
+      }
+    }
+
     //You can run steps in different containers if you choose 
     // with the container('container_name') but according to the docs it defaults to non-jnlp container which works for this use-case
     stage('Create Test Version of Application') {
@@ -59,8 +77,8 @@ agent {
             openshift.withProject( "${DEV_PROJECT}" ){
 
             //try {
-            echo "Attempting to create secret in case it was not created"
-            openshift.raw("create secret generic my-secret --from-literal=MYSQL_USER=${MYSQL_USER} --from-literal=MYSQL_PASSWORD=${MYSQL_PASSWORD}")
+            //echo "Attempting to create secret in case it was not created"
+            //openshift.raw("create secret generic my-secret --from-literal=MYSQL_USER=${MYSQL_USER} --from-literal=MYSQL_PASSWORD=${MYSQL_PASSWORD}")
             //} catch ( e ) {
             //  "Couldn't create secret it might already exist: ${e}"
             //}
