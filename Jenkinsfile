@@ -103,13 +103,17 @@ agent {
             openshift.raw("rollout status deploy/mysql --timeout=2m")  
             echo "deploy/mysql is available"
            
-            echo "Creating Main Application"
-            def appdeploy = openshift.raw("get deploy ${APP_NAME} -o name")
-            if ( appdeploy.equals("deployment.apps/${APP_NAME}") ) {
+            echo "Checking if deployment  ${APP_NAME} exists"
+            try {
+              def appdeploy = openshift.raw("get deploy ${APP_NAME} -o name")
               echo "Deployment ${APP_NAME} already exists"
-            } else {
-              echo "Deployment ${APP_NAME} does not exist, will create it"
-              apply = openshift.apply(openshift.raw("new-app ${REPO} --name=${APP_NAME} -l app=${APP_NAME} --env=APP_CONFIG=${APP_CONFIG} --env=APP_MODULE=${APP_MODULE} --env=MYSQL_HOST=${MYSQL_HOST} --env=MYSQL_DATABASE=${MYSQL_DATABASE} --strategy=source --dry-run --output=yaml").actions[0].out)
+            } catch ( e ) {
+              if ( e.toString().contains("NotFound") ) {
+                echo "Deployment ${APP_NAME} does not exist, will create it"
+                apply = openshift.apply(openshift.raw("new-app ${REPO} --name=${APP_NAME} -l app=${APP_NAME} --env=APP_CONFIG=${APP_CONFIG} --env=APP_MODULE=${APP_MODULE} --env=MYSQL_HOST=${MYSQL_HOST} --env=MYSQL_DATABASE=${MYSQL_DATABASE} --strategy=source --dry-run --output=yaml").actions[0].out)
+              } else {
+                throw e
+              }
             }
 
             //apply = openshift.apply(openshift.raw("new-app ${REPO} --name=${APP_NAME} -l app=${APP_NAME} --env=APP_CONFIG=${APP_CONFIG} --env=APP_MODULE=${APP_MODULE} --env=MYSQL_HOST=${MYSQL_HOST} --env=MYSQL_DATABASE=${MYSQL_DATABASE} --as-deployment-config=true --strategy=source --dry-run --output=yaml").actions[0].out)
