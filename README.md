@@ -107,13 +107,15 @@ So this example assumes a pipeline scenario where there is a running production 
     ```bash
     export BASE_IMAGE=registry.redhat.io/openshift4/ose-jenkins-agent-base:v4.10.0
     ``` 
-
-    If you do not have access you can try this option
+    else:  
+      - If you do not have access you can try this option
+        ```bash
+        export BASE_IMAGE=image-registry.openshift-image-registry.svc:5000/openshift/jenkins-agent-base:latest
+        ``` 
+    then create dockerfile with image
     ```bash
-    export BASE_IMAGE=image-registry.openshift-image-registry.svc:5000/openshift/jenkins-agent-base:latest
-    ``` 
-  
-    `export PYTHON_DOCKERFILE=$(curl https://raw.githubusercontent.com/MoOyeg/testFlask-Jenkins/master/Dockerfile | envsubst )`
+    export PYTHON_DOCKERFILE=$(curl https://raw.githubusercontent.com/MoOyeg/testFlask-Jenkins/master/Dockerfile | envsubst )
+    ```
 
   - Build Slave Image in Jenkins Project  
     `oc new-build --strategy=docker -D="$PYTHON_DOCKERFILE" --name=python-jenkins -n $JENKINS_NAMESPACE`
