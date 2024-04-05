@@ -22,7 +22,7 @@ agent {
       steps {
         echo "Clone our Application Source Code}"
         script {             
-          sh "git clone ${REPO}"
+          sh "git clone ${REPO} -b ${BRANCH}"
         }
       }     
     }
