@@ -252,6 +252,7 @@ For this Example RWX is required for storage class
   oc set env bc/$APP_NAME-pipeline-volume \
   --env=JENKINS_NAMESPACE=$JENKINS_NAMESPACE \
   --env=REPO="https://github.com/MoOyeg/testFlask.git" \
+  --env=BRANCH="master" \
   --env=DEV_PROJECT=$NAMESPACE_DEV --env=APP_NAME=$APP_NAME \
   --env=APP_CONFIG=$APP_CONFIG --env=APP_MODULE=$APP_MODULE \
   --env=MYSQL_USER=$MYSQL_USER --env=MYSQL_PASSWORD=$MYSQL_PASSWORD \
