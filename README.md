@@ -158,6 +158,7 @@ So this example assumes a pipeline scenario where there is a running production 
       oc set env bc/$APP_NAME-pipeline \
     --env=JENKINS_NAMESPACE=$JENKINS_NAMESPACE \
     --env=REPO="https://github.com/MoOyeg/testFlask.git" \
+    --env=BRANCH=master \
     --env=DEV_PROJECT=$NAMESPACE_DEV --env=APP_NAME=$APP_NAME \
     --env=MYSQL_USER=$MYSQL_USER --env=MYSQL_PASSWORD=$MYSQL_PASSWORD \
     --env=APP_CONFIG=$APP_CONFIG --env=APP_MODULE=$APP_MODULE \
